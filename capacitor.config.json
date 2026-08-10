@@ -1,0 +1,9 @@
+{
+  "appId": "pt.cacamarket.app",
+  "appName": "CaçaMarket",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "backgroundColor": "#14201A"
+}
