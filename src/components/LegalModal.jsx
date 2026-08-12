@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X, FileText, Shield } from 'lucide-react'
 
-const CONTACT_EMAIL = 'wildmarket@proton.me'
+const CONTACT_EMAIL = 'cacamarket@proton.me'
 const PLATFORM_NAME = 'WildMarket'
 const LAST_UPDATED = 'agosto de 2026'
 
