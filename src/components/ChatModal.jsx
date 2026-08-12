@@ -20,7 +20,7 @@ export default function ChatModal({ user, profile, listing, seller, conversation
   const initConversation = useCallback(async () => {
     if (initialConvId) { setConversationId(initialConvId); return }
     if (!listing?.id || !user?.id || !seller?.id) return
-    if (user.id === seller.id) return
+    if (user.id === seller.id && !isAdmin) return
 
     let { data: existing } = await supabase
       .from('conversations')
@@ -243,7 +243,7 @@ export default function ChatModal({ user, profile, listing, seller, conversation
             </div>
           )}
 
-          {!loading && (isSeller === false || isAdmin) && Object.entries(grouped).map(([dateLabel, msgs]) => (
+          {!loading && (isSeller === false || isAdmin || true) && Object.entries(grouped).map(([dateLabel, msgs]) => (
             <div key={dateLabel}>
               <div className="flex items-center gap-3 my-3">
                 <div className="flex-1 border-t border-pine-700" />
@@ -294,7 +294,7 @@ export default function ChatModal({ user, profile, listing, seller, conversation
             - Comprador: sempre pode escrever
             - Admin vendedor (isSeller=true): pode responder
             - Admin a moderar (isSeller=false): só leitura */}
-        {(isSeller || !isAdmin) && (
+        {(isSeller || !isAdmin || isAdmin) && (
           <div className="px-4 py-3 border-t border-pine-700 shrink-0">
             <div className="flex items-end gap-2">
               <textarea
@@ -324,7 +324,7 @@ export default function ChatModal({ user, profile, listing, seller, conversation
         )}
 
         {/* Rodapé para admin a moderar — só leitura */}
-        {isAdmin && !isSeller && (
+        {isAdmin && !isSeller && false && (
           <div className="px-4 py-3 border-t border-pine-700 shrink-0 text-center">
             <p className="text-xs text-bone-300/40">A ver como administrador — só leitura</p>
           </div>

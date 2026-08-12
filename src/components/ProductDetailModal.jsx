@@ -126,7 +126,7 @@ function PhotoGallery({ listing, onOpenLightbox }) {
   )
 }
 
-export default function ProductDetailModal({ listing, onClose, onOpenSeller, onOpenChat, sellers, onDelete, canDelete, user, onOpenLightbox }) {
+export default function ProductDetailModal({ listing, onClose, onOpenSeller, onOpenChat, sellers, onDelete, canDelete, user, profile, onOpenLightbox }) {
   const [showContact, setShowContact] = useState(false)
 
   if (!listing) return null
@@ -136,6 +136,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
 
   const hasContact = seller.phone || seller.email
   const isSeller = user?.id === listing.sellerId
+  const isAdmin = profile?.role === 'admin'
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -199,7 +200,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
           </button>
 
           {/* Botão chat interno — só para utilizadores registados que não são o vendedor */}
-          {user && !isSeller && (
+          {user && (!isSeller || isAdmin) && (
             <button
               onClick={() => onOpenChat(listing, seller)}
               className="w-full flex items-center justify-center gap-2 bg-blaze-500 hover:bg-blaze-400 text-pine-950 text-sm font-semibold py-3 rounded-lg transition-colors"
@@ -210,7 +211,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
           )}
 
           {/* Contactos externos (WhatsApp, telefone, email) */}
-          {user && !isSeller && (
+          {user && (!isSeller || isAdmin) && (
             <>
               <button
                 onClick={() => setShowContact((v) => !v)}

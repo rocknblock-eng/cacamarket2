@@ -470,6 +470,7 @@ export default function App() {
         }}
         sellers={allSellers}
         user={user}
+        profile={profile}
         onDelete={handleDeleteListing}
         canDelete={
           !!viewingListing &&
