@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings, Coins, Plus, Minus } from 'lucide-react'
+import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings, Coins, Plus, Minus, Ban, ShieldOff, ShieldCheck } from 'lucide-react'
 import { LISTINGS, SELLERS } from '../data/listings.js'
 import { supabase } from '../lib/supabaseClient.js'
 
@@ -84,20 +84,112 @@ function StatsTab({ listings, sellers }) {
   )
 }
 
-function UsersTab({ sellers }) {
+function UsersTab() {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [acting, setActing] = useState(null)
+
+  const loadUsers = useCallback(async () => {
+    setLoading(true)
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, role, verified, blocked, suspended')
+      .order('full_name', { ascending: true })
+    if (data) setUsers(data)
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { loadUsers() }, [loadUsers])
+
+  async function handleAction(userId, field, value, userName) {
+    const label = field === 'blocked'
+      ? (value ? `banir ${userName}` : `desbanir ${userName}`)
+      : (value ? `suspender ${userName}` : `reativar ${userName}`)
+    if (!window.confirm(`Tens a certeza que queres ${label}?`)) return
+    setActing(userId)
+    await supabase.from('profiles').update({ [field]: value }).eq('id', userId)
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, [field]: value } : u))
+    setActing(null)
+  }
+
+  const roleLabel = (role) => {
+    if (role === 'admin') return 'Admin'
+    if (role === 'loja') return 'Loja'
+    return 'Particular'
+  }
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-16">
+      <span className="text-bone-300/40 text-sm">A carregar...</span>
+    </div>
+  )
+
   return (
     <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
-      {Object.values(sellers).map((s) => (
-        <div key={s.id} className="flex items-center justify-between px-4 py-3 border-b border-pine-700 last:border-0">
-          <div>
-            <div className="text-bone-100 text-sm font-medium">{s.name}</div>
-            <div className="text-bone-300/60 text-xs">{s.type} · {s.location}</div>
+      {/* Cabeçalho */}
+      <div className="grid grid-cols-[1fr_70px_100px_110px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
+        <span>Utilizador</span>
+        <span className="text-center">Tipo</span>
+        <span className="text-center">Suspender</span>
+        <span className="text-center">Banir</span>
+      </div>
+
+      {users.length === 0 && (
+        <div className="px-4 py-8 text-center text-bone-300/40 text-sm">Nenhum utilizador registado.</div>
+      )}
+
+      {users.map((u) => (
+        <div key={u.id} className={`grid grid-cols-[1fr_70px_100px_110px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0 ${u.blocked ? 'opacity-50' : ''}`}>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-bone-100 text-sm font-medium truncate">{u.full_name || '—'}</span>
+              {u.blocked && <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full shrink-0">Banido</span>}
+              {u.suspended && !u.blocked && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded-full shrink-0">Suspenso</span>}
+            </div>
+            <div className="text-bone-300/50 text-xs truncate">{u.email || '—'}</div>
           </div>
-          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-            s.verified ? 'bg-brass-500/20 text-brass-400' : 'bg-pine-700 text-bone-300/60'
-          }`}>
-            {s.verified ? 'Verificado' : 'Por verificar'}
-          </span>
+
+          <div className="flex justify-center">
+            <span className="text-xs text-bone-300/60 bg-pine-700 px-2 py-0.5 rounded-full">{roleLabel(u.role)}</span>
+          </div>
+
+          {/* Suspender / Reativar */}
+          <div className="flex justify-center">
+            {u.role !== 'admin' && (
+              <button
+                onClick={() => handleAction(u.id, 'suspended', !u.suspended, u.full_name)}
+                disabled={acting === u.id || u.blocked}
+                className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40 ${
+                  u.suspended
+                    ? 'bg-brass-500/20 text-brass-400 hover:bg-brass-500/30'
+                    : 'bg-pine-700 text-bone-300 hover:bg-yellow-500/20 hover:text-yellow-400'
+                }`}
+                title={u.suspended ? 'Reativar conta' : 'Suspender conta'}
+              >
+                {u.suspended ? <ShieldCheck size={13} /> : <ShieldOff size={13} />}
+                {u.suspended ? 'Reativar' : 'Suspender'}
+              </button>
+            )}
+          </div>
+
+          {/* Banir / Desbanir */}
+          <div className="flex justify-center">
+            {u.role !== 'admin' && (
+              <button
+                onClick={() => handleAction(u.id, 'blocked', !u.blocked, u.full_name)}
+                disabled={acting === u.id}
+                className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40 ${
+                  u.blocked
+                    ? 'bg-pine-700 text-bone-300 hover:bg-brass-500/20 hover:text-brass-400'
+                    : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                }`}
+                title={u.blocked ? 'Desbanir utilizador' : 'Banir utilizador'}
+              >
+                <Ban size={13} />
+                {u.blocked ? 'Desbanir' : 'Banir'}
+              </button>
+            )}
+          </div>
         </div>
       ))}
     </div>

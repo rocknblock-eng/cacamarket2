@@ -13,6 +13,7 @@ import UserProfileModal from './components/UserProfileModal.jsx'
 import ChatModal from './components/ChatModal.jsx'
 import InboxModal from './components/InboxModal.jsx'
 import LegalModal from './components/LegalModal.jsx'
+import EditListingModal from './components/EditListingModal.jsx'
 import { LISTINGS, SELLERS } from './data/listings.js'
 import { supabase } from './lib/supabaseClient.js'
 
@@ -32,6 +33,7 @@ export default function App() {
   const [payWallOpen, setPayWallOpen] = useState(false)
   const [paypalStatus, setPaypalStatus] = useState(null) // null | 'confirming' | 'success' | 'error'
   const [viewingListing, setViewingListing] = useState(null)
+  const [editingListing, setEditingListing] = useState(null)
   const [profileOpen, setProfileOpen] = useState(false)
   const [inboxOpen, setInboxOpen] = useState(false)
   const [activeChat, setActiveChat] = useState(null)
@@ -471,6 +473,7 @@ export default function App() {
         sellers={allSellers}
         user={user}
         profile={profile}
+        onEdit={(listing) => { setViewingListing(null); setEditingListing(listing) }}
         onDelete={handleDeleteListing}
         canDelete={
           !!viewingListing &&
@@ -479,6 +482,18 @@ export default function App() {
         }
         onOpenLightbox={(images, index) => setLightbox({ images, index })}
       />
+
+      {editingListing && (
+        <EditListingModal
+          user={user}
+          listing={editingListing}
+          onClose={() => setEditingListing(null)}
+          onUpdated={() => {
+            setEditingListing(null)
+            loadListings()
+          }}
+        />
+      )}
 
       {/* Lightbox — fora de todos os modais, no topo da app */}
       {lightbox && (

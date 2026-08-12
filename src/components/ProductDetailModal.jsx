@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, MapPin, ShieldCheck, Star, Trash2, MessageCircle, Mail, Phone, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
+import { X, MapPin, ShieldCheck, Star, Trash2, Pencil, MessageCircle, Mail, Phone, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
 
 function whatsappLink(phone, listingTitle) {
   const digits = phone.replace(/[^\d]/g, '')
@@ -126,7 +126,7 @@ function PhotoGallery({ listing, onOpenLightbox }) {
   )
 }
 
-export default function ProductDetailModal({ listing, onClose, onOpenSeller, onOpenChat, sellers, onDelete, canDelete, user, profile, onOpenLightbox }) {
+export default function ProductDetailModal({ listing, onClose, onOpenSeller, onOpenChat, sellers, onDelete, canDelete, onEdit, user, profile, onOpenLightbox }) {
   const [showContact, setShowContact] = useState(false)
 
   if (!listing) return null
@@ -137,6 +137,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
   const hasContact = seller.phone || seller.email
   const isSeller = user?.id === listing.sellerId
   const isAdmin = profile?.role === 'admin'
+  const canEdit = isSeller && listing.source === 'db'
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -266,6 +267,16 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
             <p className="text-xs text-bone-300/50 text-center">
               Regista-te para contactar o vendedor.
             </p>
+          )}
+
+          {canEdit && (
+            <button
+              onClick={() => onEdit(listing)}
+              className="w-full flex items-center justify-center gap-2 bg-pine-700 hover:bg-pine-600 text-bone-100 text-sm font-semibold py-2.5 rounded-lg transition-colors"
+            >
+              <Pencil size={15} />
+              Editar anúncio
+            </button>
           )}
 
           {canDelete && (
