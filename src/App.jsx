@@ -571,7 +571,7 @@ export default function App() {
             Política de Privacidade
           </button>
           <span>·</span>
-          <span>© {new Date().getFullYear()} CaçaMarket</span>
+          <span>© {new Date().getFullYear()} WildMarket</span>
         </div>
       </footer>
     </div>

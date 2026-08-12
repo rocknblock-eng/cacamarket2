@@ -1,6 +1,6 @@
 {
-  "appId": "pt.cacamarket.app",
-  "appName": "CaçaMarket",
+  "appId": "app.wildmarket",
+  "appName": "WildMarket",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

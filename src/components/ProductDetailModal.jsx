@@ -3,13 +3,13 @@ import { X, MapPin, ShieldCheck, Star, Trash2, MessageCircle, Mail, Phone, Chevr
 
 function whatsappLink(phone, listingTitle) {
   const digits = phone.replace(/[^\d]/g, '')
-  const message = encodeURIComponent(`Olá! Tenho interesse no anúncio "${listingTitle}" no CaçaMarket.`)
+  const message = encodeURIComponent(`Olá! Tenho interesse no anúncio "${listingTitle}" no WildMarket.`)
   return `https://wa.me/${digits}?text=${message}`
 }
 
 function emailLink(email, listingTitle) {
   const subject = encodeURIComponent(`Interesse no anúncio: ${listingTitle}`)
-  const body = encodeURIComponent(`Olá! Tenho interesse no anúncio "${listingTitle}" no CaçaMarket.`)
+  const body = encodeURIComponent(`Olá! Tenho interesse no anúncio "${listingTitle}" no WildMarket.`)
   return `mailto:${email}?subject=${subject}&body=${body}`
 }
 

@@ -5,7 +5,7 @@ export default function Header({ onOpenAuth, onOpenAdmin, onOpenSell, onOpenProf
     <header className="sticky top-0 z-30 bg-pine-950/95 backdrop-blur border-b border-pine-700">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
         <div className="flex items-center shrink-0">
-          <img src="/logo.bmp" alt="CaçaMarket" className="h-18 w-auto" />
+          <img src="/logo.svg" alt="WildMarket" className="h-18 w-auto" />
         </div>
 
         <div className="flex-1 flex items-center bg-pine-800 border border-pine-600 rounded-full px-3 py-2 gap-2">

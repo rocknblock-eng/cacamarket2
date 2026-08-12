@@ -55,7 +55,7 @@ export default function PayWallModal({ profile, onClose }) {
         <p className="text-bone-300/70 text-sm mb-4">
           {isLoja
             ? 'Já usaste o teu pacote inicial de 5 anúncios grátis. A partir daqui, cada anúncio tem um donativo de 1€ que ajuda a manter a plataforma.'
-            : 'O teu anúncio gratuito já foi usado. A partir do 2º anúncio, pedimos um donativo de 1€ para manter o CaçaMarket.'}
+            : 'O teu anúncio gratuito já foi usado. A partir do 2º anúncio, pedimos um donativo de 1€ para manter o WildMarket.'}
         </p>
 
         <div className="flex flex-col gap-2 mb-4">
