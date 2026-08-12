@@ -1,11 +1,12 @@
-import { useState } from 'react'
-import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings, Coins, Plus, Minus } from 'lucide-react'
 import { LISTINGS, SELLERS } from '../data/listings.js'
 import { supabase } from '../lib/supabaseClient.js'
 
 const TABS = [
   { id: 'stats', label: 'Estatísticas', icon: BarChart3 },
   { id: 'users', label: 'Utilizadores', icon: Users },
+  { id: 'credits', label: 'Créditos', icon: Coins },
   { id: 'moderation', label: 'Moderação', icon: ListChecks },
   { id: 'settings', label: 'Definições', icon: Settings }
 ]
@@ -34,7 +35,7 @@ export default function AdminPanel({
 
       <h1 className="font-display font-bold text-2xl text-bone-100 mb-5">Painel de Administração</h1>
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -53,6 +54,7 @@ export default function AdminPanel({
 
       {tab === 'stats' && <StatsTab listings={allListings} sellers={allSellers} />}
       {tab === 'users' && <UsersTab sellers={allSellers} />}
+      {tab === 'credits' && <CreditsTab />}
       {tab === 'moderation' && (
         <ModerationTab listings={allListings} onDeleteListing={onDeleteListing} />
       )}
@@ -102,6 +104,213 @@ function UsersTab({ sellers }) {
   )
 }
 
+function CreditsTab() {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [adjusting, setAdjusting] = useState(null) // id do utilizador a ajustar
+  const [amount, setAmount] = useState('')
+  const [reason, setReason] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [feedback, setFeedback] = useState(null) // { type: 'success'|'error', msg }
+
+  const loadUsers = useCallback(async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, role, listing_credits, free_listing_used')
+      .order('full_name', { ascending: true })
+    if (!error && data) setUsers(data)
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { loadUsers() }, [loadUsers])
+
+  function openAdjust(user) {
+    setAdjusting(user)
+    setAmount('')
+    setReason('')
+    setFeedback(null)
+  }
+
+  function closeAdjust() {
+    setAdjusting(null)
+    setAmount('')
+    setReason('')
+    setFeedback(null)
+  }
+
+  async function handleAdjust(type) {
+    const n = parseInt(amount)
+    if (!n || n <= 0) { setFeedback({ type: 'error', msg: 'Introduz um número válido.' }); return }
+    setSaving(true)
+    setFeedback(null)
+
+    const delta = type === 'add' ? n : -n
+    const newCredits = Math.max(0, (adjusting.listing_credits || 0) + delta)
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ listing_credits: newCredits })
+      .eq('id', adjusting.id)
+
+    setSaving(false)
+    if (error) {
+      setFeedback({ type: 'error', msg: 'Erro ao atualizar créditos: ' + error.message })
+    } else {
+      setFeedback({ type: 'success', msg: `Créditos atualizados para ${newCredits}.` })
+      setUsers(prev => prev.map(u => u.id === adjusting.id ? { ...u, listing_credits: newCredits } : u))
+      setTimeout(closeAdjust, 1200)
+    }
+  }
+
+  const roleLabel = (role) => {
+    if (role === 'admin') return 'Admin'
+    if (role === 'loja') return 'Loja'
+    return 'Particular'
+  }
+
+  const roleColor = (role) => {
+    if (role === 'admin') return 'text-blaze-400 bg-blaze-500/10'
+    if (role === 'loja') return 'text-brass-400 bg-brass-500/10'
+    return 'text-bone-300 bg-pine-700'
+  }
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-16">
+      <span className="text-bone-300/40 text-sm">A carregar utilizadores...</span>
+    </div>
+  )
+
+  return (
+    <div className="space-y-4">
+      {/* Tabela */}
+      <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
+        {/* Cabeçalho */}
+        <div className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
+          <span>Utilizador</span>
+          <span className="text-center">Tipo</span>
+          <span className="text-center">Créditos</span>
+          <span className="text-center">1.º Grátis</span>
+          <span className="text-center">Ação</span>
+        </div>
+
+        {users.length === 0 && (
+          <div className="px-4 py-8 text-center text-bone-300/40 text-sm">
+            Nenhum utilizador registado.
+          </div>
+        )}
+
+        {users.map((u) => (
+          <div key={u.id} className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0">
+            {/* Nome + email */}
+            <div className="min-w-0">
+              <div className="text-bone-100 text-sm font-medium truncate">{u.full_name || '—'}</div>
+              <div className="text-bone-300/50 text-xs truncate">{u.email || '—'}</div>
+            </div>
+
+            {/* Tipo */}
+            <div className="flex justify-center">
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${roleColor(u.role)}`}>
+                {roleLabel(u.role)}
+              </span>
+            </div>
+
+            {/* Créditos */}
+            <div className="text-center font-display font-bold text-blaze-400 text-lg">
+              {u.listing_credits ?? 0}
+            </div>
+
+            {/* 1.º grátis usado */}
+            <div className="text-center text-sm">
+              {u.role === 'particular'
+                ? (u.free_listing_used ? '✅' : '⬜')
+                : '—'}
+            </div>
+
+            {/* Botão ajustar */}
+            <div className="flex justify-center">
+              <button
+                onClick={() => openAdjust(u)}
+                className="text-xs bg-pine-700 hover:bg-pine-600 text-bone-100 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                Ajustar
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modal de ajuste */}
+      {adjusting && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-pine-800 border border-pine-600 rounded-2xl w-full max-w-sm p-6 space-y-4">
+            <h3 className="text-bone-100 font-display font-bold text-base">
+              Ajustar créditos — {adjusting.full_name}
+            </h3>
+            <div className="bg-pine-700/50 rounded-lg px-3 py-2 text-sm">
+              <span className="text-bone-300/70">Créditos actuais: </span>
+              <span className="text-blaze-400 font-bold">{adjusting.listing_credits ?? 0}</span>
+            </div>
+
+            <div>
+              <label className="text-xs text-bone-300/70 block mb-1">Quantidade</label>
+              <input
+                type="number"
+                min="1"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Ex: 5"
+                className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 outline-none focus:border-blaze-500 w-full"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-bone-300/70 block mb-1">Motivo (opcional)</label>
+              <input
+                type="text"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Ex: Bónus de boas-vindas"
+                className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 outline-none focus:border-blaze-500 w-full"
+              />
+            </div>
+
+            {feedback && (
+              <p className={`text-xs ${feedback.type === 'success' ? 'text-brass-400' : 'text-red-400'}`}>
+                {feedback.msg}
+              </p>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleAdjust('add')}
+                disabled={saving}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-brass-500 hover:bg-brass-400 disabled:opacity-50 text-pine-950 font-semibold text-sm py-2.5 rounded-lg transition-colors"
+              >
+                <Plus size={15} /> Bónus
+              </button>
+              <button
+                onClick={() => handleAdjust('remove')}
+                disabled={saving}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-red-500/80 hover:bg-red-500 disabled:opacity-50 text-white font-semibold text-sm py-2.5 rounded-lg transition-colors"
+              >
+                <Minus size={15} /> Penalização
+              </button>
+            </div>
+
+            <button
+              onClick={closeAdjust}
+              className="w-full text-bone-300/60 hover:text-bone-100 text-sm py-1 transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function SettingsTab({ settings, onSaved }) {
   const [launchDate, setLaunchDate] = useState(settings?.launch_date ?? '')
   const [saving, setSaving] = useState(false)
@@ -131,9 +340,8 @@ function SettingsTab({ settings, onSaved }) {
     return until.toLocaleDateString('pt-PT')
   })()
 
-  // Status atual: estamos em período de graça?
   const isCurrentlyFree = (() => {
-    if (!launchDate) return true // Sem data definida = sempre grátis
+    if (!launchDate) return true
     const launch = new Date(launchDate)
     const until = new Date(launch)
     until.setDate(until.getDate() + freeDays)
@@ -203,12 +411,12 @@ function ModerationTab({ listings, onDeleteListing }) {
             </div>
           </div>
           <button
-              onClick={() => onDeleteListing(l)}
-              className="text-red-400 hover:text-red-300 shrink-0"
-              title="Apagar anúncio"
-            >
-              <Trash2 size={18} />
-            </button>
+            onClick={() => onDeleteListing(l)}
+            className="text-red-400 hover:text-red-300 shrink-0"
+            title="Apagar anúncio"
+          >
+            <Trash2 size={18} />
+          </button>
         </div>
       ))}
     </div>
