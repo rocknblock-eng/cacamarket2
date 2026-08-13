@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, User, Phone, MapPin, Mail, Save, Star, Ticket, ShieldCheck, Store, AlertCircle, CheckCircle } from 'lucide-react'
+import { X, User, Phone, MapPin, Mail, Save, Star, Ticket, ShieldCheck, Store, AlertCircle, CheckCircle, Trash2 } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient.js'
 
 export default function UserProfileModal({ user, profile, isFreePeriod, onClose, onSaved }) {
@@ -10,8 +10,7 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState(null)
 
-  // Estado para alteração de email
-  const [emailSection, setEmailSection] = useState(false) // mostra/esconde o formulário
+  const [emailSection, setEmailSection] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const [emailSaving, setEmailSaving] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
@@ -29,7 +28,6 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
     ? <ShieldCheck size={14} />
     : <User size={14} />
 
-  // Créditos — só para mostrar, nunca para editar
   const credits = profile?.listing_credits ?? 0
   const freeUsed = profile?.free_listing_used ?? false
 
@@ -83,7 +81,6 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
 
   const creditStatus = creditsInfo()
 
-  // Guardar nome, telefone e localização
   async function handleSave() {
     setError(null)
     setSaving(true)
@@ -109,7 +106,6 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
     onSaved?.()
   }
 
-  // Pedir alteração de email — o Supabase envia link de confirmação para o novo email
   async function handleEmailChange() {
     setEmailError(null)
     const trimmed = newEmail.trim().toLowerCase()
@@ -134,6 +130,14 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
 
     setEmailSent(true)
     setNewEmail('')
+  }
+
+  function handleDeleteRequest() {
+    const subject = encodeURIComponent('Pedido de cancelamento de conta — WildMarket')
+    const body = encodeURIComponent(
+      `Olá,\n\nVenho por este meio solicitar o cancelamento da minha conta no WildMarket.\n\nEmail da conta: ${user?.email}\n\nObrigado.`
+    )
+    window.open(`mailto:cacamarket@proton.me?subject=${subject}&body=${body}`, '_blank')
   }
 
   return (
@@ -178,7 +182,7 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
             </div>
           </div>
 
-          {/* Bloco de créditos — só leitura, nunca editável */}
+          {/* Bloco de créditos */}
           <div className={`rounded-xl border px-4 py-3 ${creditStatus.bg}`}>
             <div className="flex items-center gap-2 mb-1">
               <Ticket size={15} className={creditStatus.color} />
@@ -201,7 +205,6 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
               {user?.email || '—'}
             </div>
 
-            {/* Botão para mostrar/esconder formulário de alteração */}
             {!emailSection && !emailSent && (
               <button
                 onClick={() => { setEmailSection(true); setEmailError(null) }}
@@ -211,7 +214,6 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
               </button>
             )}
 
-            {/* Formulário de alteração de email */}
             {emailSection && !emailSent && (
               <div className="mt-3 space-y-2">
                 <input
@@ -248,7 +250,6 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
               </div>
             )}
 
-            {/* Confirmação de email enviado */}
             {emailSent && (
               <div className="mt-2 flex items-start gap-2 text-xs text-brass-400 bg-brass-400/10 border border-brass-400/20 rounded-lg px-3 py-2">
                 <CheckCircle size={13} className="mt-0.5 shrink-0" />
@@ -332,6 +333,24 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
               Membro desde {new Date(profile.member_since).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })}
             </p>
           )}
+
+          {/* Cancelamento de conta */}
+          <div className="border-t border-pine-700 pt-4">
+            <div className="flex items-start gap-3 bg-pine-800/40 border border-pine-700 rounded-xl px-4 py-3">
+              <Trash2 size={15} className="text-bone-300/40 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-bone-300/60 leading-relaxed">
+                  Para cancelar a tua conta e eliminar os teus dados, envia-nos um pedido por email. Responderemos no prazo de 48 horas.
+                </p>
+                <button
+                  onClick={handleDeleteRequest}
+                  className="mt-2 text-xs text-red-400/70 hover:text-red-400 transition-colors underline underline-offset-2"
+                >
+                  Solicitar cancelamento de conta
+                </button>
+              </div>
+            </div>
+          </div>
 
         </div>
       </div>
