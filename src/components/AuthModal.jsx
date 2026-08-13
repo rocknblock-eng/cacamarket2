@@ -26,7 +26,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
     setLoading(true)
 
     if (mode === 'register' && !acceptedTerms) {
-      setError('Deve aceitar os Termos e CondiÃ§Ãµes e a PolÃ­tica de Privacidade para criar conta.')
+      setError('Deve aceitar os Termos e Condições e a Política de Privacidade para criar conta.')
       setLoading(false)
       return
     }
@@ -47,7 +47,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
       })
       setLoading(false)
       if (error) {
-        setError('NÃ£o foi possÃ­vel enviar o email. Verifica o endereÃ§o e tenta novamente.')
+        setError('Não foi possível enviar o email. Verifica o endereço e tenta novamente.')
         return
       }
       setSuccessMsg('Email enviado! Verifica a tua caixa de entrada e clica no link para redefinir a palavra-passe.')
@@ -62,11 +62,11 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
       })
       setLoading(false)
       if (error) {
-        setError('NÃ£o foi possÃ­vel criar a conta. ' + (error.message.includes('already registered') ? 'Este email jÃ¡ estÃ¡ registado.' : ''))
+        setError('Não foi possível criar a conta. ' + (error.message.includes('already registered') ? 'Este email já está registado.' : ''))
         return
       }
       setError('')
-      setSuccessMsg('Conta criada! Verifica o teu email e clica no link de confirmaÃ§Ã£o antes de entrar.')
+      setSuccessMsg('Conta criada! Verifica o teu email e clica no link de confirmação antes de entrar.')
     }
   }
 
@@ -77,7 +77,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
           <X size={20} />
         </button>
 
-        {/* Tabs â€” sÃ³ aparecem no login e registo */}
+        {/* Tabs — só aparecem no login e registo */}
         {mode !== 'forgot' && (
           <div className="flex gap-2 mb-5">
             <button
@@ -99,7 +99,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
           </div>
         )}
 
-        {/* CabeÃ§alho do modo "Esqueci a palavra-passe" */}
+        {/* Cabeçalho do modo "Esqueci a palavra-passe" */}
         {mode === 'forgot' && (
           <div className="mb-5">
             <h2 className="text-bone-100 font-semibold text-base">Recuperar palavra-passe</h2>
@@ -120,7 +120,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="TelemÃ³vel (para WhatsApp) â€” opcional"
+                placeholder="Telemóvel (para WhatsApp) — opcional"
                 className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500"
               />
               <div className="flex gap-2">
@@ -167,7 +167,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
             />
           )}
 
-          {/* Link "Esqueci a palavra-passe" â€” sÃ³ no login */}
+          {/* Link "Esqueci a palavra-passe" — só no login */}
           {mode === 'login' && (
             <button
               type="button"
@@ -201,7 +201,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
                   onClick={() => onOpenLegal?.('terms')}
                   className="text-blaze-400 hover:text-blaze-300 underline underline-offset-2"
                 >
-                  Termos e CondiÃ§Ãµes
+                  Termos e Condições
                 </button>
                 {' '}e a{' '}
                 <button
@@ -209,7 +209,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
                   onClick={() => onOpenLegal?.('privacy')}
                   className="text-blaze-400 hover:text-blaze-300 underline underline-offset-2"
                 >
-                  PolÃ­tica de Privacidade
+                  Política de Privacidade
                 </button>
                 , incluindo o tratamento dos meus dados pessoais nos termos do RGPD.
               </span>
@@ -225,7 +225,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
               {loading && <Loader2 size={16} className="animate-spin" />}
               {mode === 'login' && 'Entrar'}
               {mode === 'register' && 'Criar conta'}
-              {mode === 'forgot' && 'Enviar link de recuperaÃ§Ã£o'}
+              {mode === 'forgot' && 'Enviar link de recuperação'}
             </button>
           )}
 
@@ -236,7 +236,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
               onClick={() => switchMode('login')}
               className="text-xs text-bone-300/60 hover:text-blaze-400 text-center transition-colors"
             >
-              â† Voltar ao login
+              ← Voltar ao login
             </button>
           )}
         </form>
