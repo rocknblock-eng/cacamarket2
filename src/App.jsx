@@ -14,6 +14,7 @@ import ChatModal from './components/ChatModal.jsx'
 import InboxModal from './components/InboxModal.jsx'
 import LegalModal from './components/LegalModal.jsx'
 import EditListingModal from './components/EditListingModal.jsx'
+import ResetPassword from './components/ResetPassword.jsx'
 import { LISTINGS, SELLERS } from './data/listings.js'
 import { supabase } from './lib/supabaseClient.js'
 
@@ -23,7 +24,15 @@ function roleToType(role) {
   return 'Particular'
 }
 
+// Detetar se estamos na pÃ¡gina de reset de password
+const isResetPasswordPage = window.location.pathname === '/reset-password'
+
 export default function App() {
+  // Se o URL for /reset-password, mostra sÃ³ essa pÃ¡gina
+  if (isResetPasswordPage) {
+    return <ResetPassword />
+  }
+
   const [view, setView] = useState('market') // 'market' | 'admin'
   const [category, setCategory] = useState(null)
   const [search, setSearch] = useState('')
@@ -59,9 +68,7 @@ export default function App() {
         .single()
 
       if (error) {
-        // Não há dados ou erro de acesso — deixa-mos null
-        // isFreePeriod vai retornar true (seguro: tudo grátis)
-        console.warn('Platform settings não carregaram (esperado se tabela vazia):', error.message)
+        console.warn('Platform settings nÃ£o carregaram (esperado se tabela vazia):', error.message)
       } else if (data) {
         setPlatformSettings(data)
       }
@@ -76,31 +83,16 @@ export default function App() {
     loadSettings()
   }, [loadSettings])
 
-  // SISTEMA DE PERÍODO DE GRAÇA (ROBUSTO):
-  // REGRA PRINCIPAL: Por defeito, TUDO É GRÁTIS
-  //
-  // - Se settings não carregaram: GRÁTIS (isFreePeriod = true)
-  // - Se launch_date NÃO está definida: GRÁTIS (isFreePeriod = true)
-  // - Se launch_date ESTÁ definida, verifica período de graça
   const isFreePeriod = useMemo(() => {
-    // Por segurança: enquanto carrega ou se há erro, é grátis
     if (!settingsLoaded || !platformSettings) return true
-
-    // Se nenhuma data foi definida no admin, é SEMPRE grátis
     if (!platformSettings.launch_date) return true
-
-    // Calcula até quando é grátis
     const launch = new Date(platformSettings.launch_date)
     const freeDays = platformSettings.free_period_days || 90
     const freeUntil = new Date(launch)
     freeUntil.setDate(freeUntil.getDate() + freeDays)
-
-    // Se ainda estamos dentro do período de graça, é grátis
     return new Date() < freeUntil
   }, [platformSettings, settingsLoaded])
 
-  // Ao carregar a página, verifica se já há sessão iniciada,
-  // e fica atento a logins/logouts para manter tudo sincronizado.
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null)
@@ -114,7 +106,6 @@ export default function App() {
     return () => listener.subscription.unsubscribe()
   }, [])
 
-  // Sempre que o utilizador muda, vai buscar o perfil dele (nome, tipo de conta, etc.)
   const refreshProfile = useCallback(async (userId) => {
     if (!userId) return
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
@@ -126,7 +117,6 @@ export default function App() {
     refreshProfile(user.id)
   }, [user, refreshProfile])
 
-  // Conta mensagens não lidas — aparece como badge no ícone de mensagens
   const loadUnreadCount = useCallback(async () => {
     if (!user) { setUnreadCount(0); return }
     const { data: convs } = await supabase
@@ -154,8 +144,6 @@ export default function App() {
     return () => supabase.removeChannel(channel)
   }, [user, loadUnreadCount])
 
-  // Vai buscar os anúncios reais publicados pelos utilizadores, juntamente
-  // com os dados de quem os publicou (para mostrar nome, selo, avaliação, etc.)
   const loadListings = useCallback(async () => {
     const { data, error } = await supabase
       .from('listings')
@@ -192,8 +180,8 @@ export default function App() {
         verified: p.verified,
         rating: p.rating || 0,
         reviews: p.reviews_count || 0,
-        location: p.location || '—',
-        memberSince: p.member_since ? new Date(p.member_since).getFullYear().toString() : '—',
+        location: p.location || 'â€”',
+        memberSince: p.member_since ? new Date(p.member_since).getFullYear().toString() : 'â€”',
         phone: p.phone || null,
         email: p.email || null
       }
@@ -212,47 +200,21 @@ export default function App() {
     setView('market')
   }
 
-  // Decide se o próximo anúncio precisa de pagamento.
-  // REGRA PRINCIPAL: Se isFreePeriod=true, NINGUÉM paga. Nunca.
   function needsPayment(profile) {
-    // PRIMEIRA REGRA: Em período de graça, ninguém paga NUNCA
-    if (isFreePeriod) {
-      return false
-    }
-
-    // Se não há perfil, assume que precisa pagar (seguro)
-    if (!profile) {
-      return true
-    }
-
-    // SEGUNDA REGRA: Admins nunca pagam
-    if (profile.role === 'admin') {
-      return false
-    }
-
-    // TERCEIRA REGRA: Particulares
-    // - 1º anúncio grátis (free_listing_used = false)
-    // - A partir do 2º, precisa de créditos (listing_credits > 0)
+    if (isFreePeriod) return false
+    if (!profile) return true
+    if (profile.role === 'admin') return false
     if (profile.role === 'particular') {
-      if (!profile.free_listing_used) {
-        return false // Ainda tem o grátis
-      }
-      return profile.listing_credits <= 0 // Precisa de créditos
+      if (!profile.free_listing_used) return false
+      return profile.listing_credits <= 0
     }
-
-    // QUARTA REGRA: Lojas
-    // - 5 primeiros grátis
-    // - A partir do 6º, em pacotes de 5 por 5€
     if (profile.role === 'loja') {
-      return profile.listing_credits <= 0 // Precisa de créditos
+      return profile.listing_credits <= 0
     }
-
-    // Por defeito (se role desconhecido), precisa pagar
     return true
   }
 
   async function handleOpenSell() {
-    // Sempre busca o perfil mais recente antes de decidir
     const { data: freshProfile } = await supabase
       .from('profiles')
       .select('*')
@@ -270,16 +232,11 @@ export default function App() {
     }
   }
 
-  // Se, por algum motivo, o formulário ainda assim for bloqueado a pedir
-  // pagamento, fecha-o sozinho e abre logo o ecrã de pagamento certo,
-  // em vez de deixar a pessoa presa sem saída.
   function handlePaymentRequiredInSell() {
     setSellOpen(false)
     setPayWallOpen(true)
   }
 
-  // Quando a pessoa volta do PayPal depois de aprovar o pagamento,
-  // confirma a encomenda e liberta os créditos, depois abre logo o formulário.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const orderId = params.get('token')
@@ -307,7 +264,6 @@ export default function App() {
     }
   }, [user, refreshProfile])
 
-  // Extrai o caminho do ficheiro na Storage a partir do URL público da imagem
   function extractStoragePath(imageUrl) {
     if (!imageUrl) return null
     const marker = '/listing-images/'
@@ -316,15 +272,12 @@ export default function App() {
     return imageUrl.slice(idx + marker.length)
   }
 
-  // Apaga o anúncio e a fotografia associada (só funciona para anúncios reais,
-  // não para os artigos de demonstração, que não existem na base de dados)
   async function handleDeleteListing(listing) {
     const confirmed = window.confirm(
-      'Tens a certeza que queres apagar este anúncio? Esta ação não pode ser desfeita.'
+      'Tens a certeza que queres apagar este anÃºncio? Esta aÃ§Ã£o nÃ£o pode ser desfeita.'
     )
     if (!confirmed) return
 
-    // Anúncios de demonstração — remove apenas da lista local
     if (listing.source !== 'db') {
       setDeletedDemoIds(prev => [...prev, listing.id])
       setViewingListing(null)
@@ -338,7 +291,7 @@ export default function App() {
 
     const { error } = await supabase.from('listings').delete().eq('id', listing.id)
     if (error) {
-      alert('Não foi possível apagar o anúncio. Tenta novamente.')
+      alert('NÃ£o foi possÃ­vel apagar o anÃºncio. Tenta novamente.')
       return
     }
 
@@ -346,7 +299,6 @@ export default function App() {
     loadListings()
   }
 
-  // Junta os artigos de demonstração com os artigos reais publicados pelos utilizadores
   const allListings = useMemo(
     () => [...dbListings, ...LISTINGS.filter(l => !deletedDemoIds.includes(l.id)).map((l) => ({ ...l, source: 'demo' }))],
     [dbListings, deletedDemoIds]
@@ -380,7 +332,7 @@ export default function App() {
 
       {view === 'admin' && profile?.role !== 'admin' ? (
         <div className="max-w-6xl mx-auto px-4 py-16 text-center text-bone-300/60">
-          Não tens permissão para aceder ao painel de administração.
+          NÃ£o tens permissÃ£o para aceder ao painel de administraÃ§Ã£o.
         </div>
       ) : view === 'market' ? (
         <>
@@ -431,7 +383,7 @@ export default function App() {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
           <div className="bg-pine-800 border border-pine-600 rounded-xl px-6 py-5 text-center max-w-xs">
             <p className="text-bone-100 text-sm mb-3">
-              Não foi possível confirmar o pagamento. Se o dinheiro foi debitado, contacta-nos.
+              NÃ£o foi possÃ­vel confirmar o pagamento. Se o dinheiro foi debitado, contacta-nos.
             </p>
             <button
               onClick={() => setPaypalStatus(null)}
@@ -495,7 +447,6 @@ export default function App() {
         />
       )}
 
-      {/* Lightbox — fora de todos os modais, no topo da app */}
       {lightbox && (
         <div
           className="fixed inset-0 bg-black/95 flex items-center justify-center"
@@ -542,8 +493,6 @@ export default function App() {
           onClose={() => setInboxOpen(false)}
           onOpenChat={(conv) => {
             setInboxOpen(false)
-            // "seller" no ChatModal é sempre o vendedor do anúncio
-            // para que isSeller funcione corretamente
             setActiveChat({
               listing: conv.listings,
               seller: conv.seller,
@@ -570,24 +519,23 @@ export default function App() {
         />
       )}
 
-      {/* Rodapé */}
       <footer className="border-t border-pine-700 mt-8 py-5 text-center">
         <div className="flex items-center justify-center gap-4 text-xs text-bone-300/40">
           <button
             onClick={() => setLegalOpen('terms')}
             className="hover:text-bone-200 transition-colors underline underline-offset-2"
           >
-            Termos e Condições
+            Termos e CondiÃ§Ãµes
           </button>
-          <span>·</span>
+          <span>Â·</span>
           <button
             onClick={() => setLegalOpen('privacy')}
             className="hover:text-bone-200 transition-colors underline underline-offset-2"
           >
-            Política de Privacidade
+            PolÃ­tica de Privacidade
           </button>
-          <span>·</span>
-          <span>© {new Date().getFullYear()} WildMarket</span>
+          <span>Â·</span>
+          <span>Â© {new Date().getFullYear()} WildMarket</span>
         </div>
       </footer>
     </div>
