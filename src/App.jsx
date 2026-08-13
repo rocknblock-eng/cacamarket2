@@ -527,7 +527,7 @@ export default function App() {
           >
             Termos e Condições
           </button>
-          <span>Â·</span>
+          <span>·</span>
           <button
             onClick={() => setLegalOpen('privacy')}
             className="hover:text-bone-200 transition-colors underline underline-offset-2"
