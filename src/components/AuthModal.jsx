@@ -14,13 +14,19 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
   const [error, setError] = useState('')
   const [acceptedTerms, setAcceptedTerms] = useState(false)
 
+  function switchMode(newMode) {
+    setMode(newMode)
+    setError('')
+    setSuccessMsg('')
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
     if (mode === 'register' && !acceptedTerms) {
-      setError('Deve aceitar os Termos e Condições e a Política de Privacidade para criar conta.')
+      setError('Deve aceitar os Termos e CondiÃ§Ãµes e a PolÃ­tica de Privacidade para criar conta.')
       setLoading(false)
       return
     }
@@ -34,6 +40,18 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
       }
       onAuthenticated?.(data.user)
       onClose()
+
+    } else if (mode === 'forgot') {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+      setLoading(false)
+      if (error) {
+        setError('NÃ£o foi possÃ­vel enviar o email. Verifica o endereÃ§o e tenta novamente.')
+        return
+      }
+      setSuccessMsg('Email enviado! Verifica a tua caixa de entrada e clica no link para redefinir a palavra-passe.')
+
     } else {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -44,12 +62,11 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
       })
       setLoading(false)
       if (error) {
-        setError('Não foi possível criar a conta. ' + (error.message.includes('already registered') ? 'Este email já está registado.' : ''))
+        setError('NÃ£o foi possÃ­vel criar a conta. ' + (error.message.includes('already registered') ? 'Este email jÃ¡ estÃ¡ registado.' : ''))
         return
       }
-      // Mostrar mensagem a pedir confirmação de email em vez de entrar logo
       setError('')
-      setSuccessMsg('Conta criada! Verifica o teu email e clica no link de confirmação antes de entrar.')
+      setSuccessMsg('Conta criada! Verifica o teu email e clica no link de confirmaÃ§Ã£o antes de entrar.')
     }
   }
 
@@ -60,24 +77,35 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
           <X size={20} />
         </button>
 
-        <div className="flex gap-2 mb-5">
-          <button
-            onClick={() => { setMode('login'); setError('') }}
-            className={`flex-1 text-sm font-semibold py-2 rounded-lg transition-colors ${
-              mode === 'login' ? 'bg-blaze-500 text-pine-950' : 'bg-pine-700 text-bone-200'
-            }`}
-          >
-            Entrar
-          </button>
-          <button
-            onClick={() => { setMode('register'); setError('') }}
-            className={`flex-1 text-sm font-semibold py-2 rounded-lg transition-colors ${
-              mode === 'register' ? 'bg-blaze-500 text-pine-950' : 'bg-pine-700 text-bone-200'
-            }`}
-          >
-            Criar conta
-          </button>
-        </div>
+        {/* Tabs â€” sÃ³ aparecem no login e registo */}
+        {mode !== 'forgot' && (
+          <div className="flex gap-2 mb-5">
+            <button
+              onClick={() => switchMode('login')}
+              className={`flex-1 text-sm font-semibold py-2 rounded-lg transition-colors ${
+                mode === 'login' ? 'bg-blaze-500 text-pine-950' : 'bg-pine-700 text-bone-200'
+              }`}
+            >
+              Entrar
+            </button>
+            <button
+              onClick={() => switchMode('register')}
+              className={`flex-1 text-sm font-semibold py-2 rounded-lg transition-colors ${
+                mode === 'register' ? 'bg-blaze-500 text-pine-950' : 'bg-pine-700 text-bone-200'
+              }`}
+            >
+              Criar conta
+            </button>
+          </div>
+        )}
+
+        {/* CabeÃ§alho do modo "Esqueci a palavra-passe" */}
+        {mode === 'forgot' && (
+          <div className="mb-5">
+            <h2 className="text-bone-100 font-semibold text-base">Recuperar palavra-passe</h2>
+            <p className="text-bone-300/70 text-xs mt-1">Indica o teu email e enviamos um link para redefinir a palavra-passe.</p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           {mode === 'register' && (
@@ -92,7 +120,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="Telemóvel (para WhatsApp) — opcional"
+                placeholder="TelemÃ³vel (para WhatsApp) â€” opcional"
                 className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500"
               />
               <div className="flex gap-2">
@@ -117,6 +145,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
               </div>
             </>
           )}
+
           <input
             type="email"
             value={email}
@@ -125,15 +154,29 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
             placeholder="Email"
             className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500"
           />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            placeholder="Palavra-passe"
-            className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500"
-          />
+
+          {mode !== 'forgot' && (
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              placeholder="Palavra-passe"
+              className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500"
+            />
+          )}
+
+          {/* Link "Esqueci a palavra-passe" â€” sÃ³ no login */}
+          {mode === 'login' && (
+            <button
+              type="button"
+              onClick={() => switchMode('forgot')}
+              className="text-xs text-bone-300/60 hover:text-blaze-400 text-right -mt-1 transition-colors"
+            >
+              Esqueci a palavra-passe
+            </button>
+          )}
 
           {error && <p className="text-xs text-red-400">{error}</p>}
           {successMsg && (
@@ -158,7 +201,7 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
                   onClick={() => onOpenLegal?.('terms')}
                   className="text-blaze-400 hover:text-blaze-300 underline underline-offset-2"
                 >
-                  Termos e Condições
+                  Termos e CondiÃ§Ãµes
                 </button>
                 {' '}e a{' '}
                 <button
@@ -166,23 +209,41 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
                   onClick={() => onOpenLegal?.('privacy')}
                   className="text-blaze-400 hover:text-blaze-300 underline underline-offset-2"
                 >
-                  Política de Privacidade
+                  PolÃ­tica de Privacidade
                 </button>
                 , incluindo o tratamento dos meus dados pessoais nos termos do RGPD.
               </span>
             </label>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blaze-500 hover:bg-blaze-600 transition-colors text-pine-950 font-semibold text-sm py-2.5 rounded-lg mt-1 flex items-center justify-center gap-2 disabled:opacity-60"
-          >
-            {loading && <Loader2 size={16} className="animate-spin" />}
-            {mode === 'login' ? 'Entrar' : 'Criar conta'}
-          </button>
+          {!successMsg && (
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-blaze-500 hover:bg-blaze-600 transition-colors text-pine-950 font-semibold text-sm py-2.5 rounded-lg mt-1 flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              {loading && <Loader2 size={16} className="animate-spin" />}
+              {mode === 'login' && 'Entrar'}
+              {mode === 'register' && 'Criar conta'}
+              {mode === 'forgot' && 'Enviar link de recuperaÃ§Ã£o'}
+            </button>
+          )}
+
+          {/* Voltar ao login a partir do modo forgot */}
+          {mode === 'forgot' && (
+            <button
+              type="button"
+              onClick={() => switchMode('login')}
+              className="text-xs text-bone-300/60 hover:text-blaze-400 text-center transition-colors"
+            >
+              â† Voltar ao login
+            </button>
+          )}
         </form>
       </div>
     </div>
+  )
+}
+
   )
 }
