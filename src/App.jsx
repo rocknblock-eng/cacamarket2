@@ -534,8 +534,8 @@ export default function App() {
           >
             Polí­tica de Privacidade
           </button>
-          <span>Â·</span>
-          <span>Â© {new Date().getFullYear()} WildMarket</span>
+          <span>·</span>
+          <span>© {new Date().getFullYear()} WildMarket</span>
         </div>
       </footer>
     </div>
