@@ -244,6 +244,3 @@ export default function AuthModal({ onClose, onAuthenticated, onOpenLegal }) {
     </div>
   )
 }
-
-  )
-}
