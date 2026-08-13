@@ -24,11 +24,11 @@ function roleToType(role) {
   return 'Particular'
 }
 
-// Detetar se estamos na pÃ¡gina de reset de password
+// Detetar se estamos na página de reset de password
 const isResetPasswordPage = window.location.pathname === '/reset-password'
 
 export default function App() {
-  // Se o URL for /reset-password, mostra sÃ³ essa pÃ¡gina
+  // Se o URL for /reset-password, mostra são essa pÃ¡gina
   if (isResetPasswordPage) {
     return <ResetPassword />
   }
@@ -68,7 +68,7 @@ export default function App() {
         .single()
 
       if (error) {
-        console.warn('Platform settings nÃ£o carregaram (esperado se tabela vazia):', error.message)
+        console.warn('Platform settings não carregaram (esperado se tabela vazia):', error.message)
       } else if (data) {
         setPlatformSettings(data)
       }
@@ -274,7 +274,7 @@ export default function App() {
 
   async function handleDeleteListing(listing) {
     const confirmed = window.confirm(
-      'Tens a certeza que queres apagar este anÃºncio? Esta aÃ§Ã£o nÃ£o pode ser desfeita.'
+      'Tens a certeza que queres apagar este anúncio? Esta ação não pode ser desfeita.'
     )
     if (!confirmed) return
 
@@ -291,7 +291,7 @@ export default function App() {
 
     const { error } = await supabase.from('listings').delete().eq('id', listing.id)
     if (error) {
-      alert('NÃ£o foi possÃ­vel apagar o anÃºncio. Tenta novamente.')
+      alert('Não foi possí­vel apagar o anúncio. Tenta novamente.')
       return
     }
 
@@ -525,14 +525,14 @@ export default function App() {
             onClick={() => setLegalOpen('terms')}
             className="hover:text-bone-200 transition-colors underline underline-offset-2"
           >
-            Termos e CondiÃ§Ãµes
+            Termos e Condições
           </button>
           <span>Â·</span>
           <button
             onClick={() => setLegalOpen('privacy')}
             className="hover:text-bone-200 transition-colors underline underline-offset-2"
           >
-            PolÃ­tica de Privacidade
+            Polí­tica de Privacidade
           </button>
           <span>Â·</span>
           <span>Â© {new Date().getFullYear()} WildMarket</span>
