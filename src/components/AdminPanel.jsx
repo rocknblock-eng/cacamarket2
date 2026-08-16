@@ -67,10 +67,10 @@ export default function AdminPanel({
 
 function StatsTab({ listings, sellers }) {
   const stats = [
-    { label: 'Anuncios ativos', value: listings.length },
+    { label: 'anúncios ativos', value: listings.length },
     { label: 'Vendedores registados', value: Object.keys(sellers).length },
     { label: 'Vendedores verificados', value: Object.values(sellers).filter((s) => s.verified).length },
-    { label: 'Valor total em anuncios', value: `${listings.reduce((a, l) => a + Number(l.price), 0)} EUR` }
+    { label: 'Valor total em anúncios', value: `${listings.reduce((a, l) => a + Number(l.price), 0)} EUR` }
   ]
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -548,7 +548,7 @@ function ModerationTab({ listings, onDeleteListing, dbListings }) {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Botao destaque — so para anuncios reais */}
+            {/* Botao destaque — so para anúncios reais */}
             {l.source !== 'demo' && (
               <button
                 onClick={() => toggleFeatured(l)}
@@ -568,7 +568,7 @@ function ModerationTab({ listings, onDeleteListing, dbListings }) {
             <button
               onClick={() => onDeleteListing(l)}
               className="text-red-400 hover:text-red-300 shrink-0"
-              title="Apagar anuncio"
+              title="Apagar anúncio"
             >
               <Trash2 size={18} />
             </button>
