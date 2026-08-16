@@ -4,16 +4,41 @@ export default function ProductGrid({ listings, onOpenSeller, onView, sellers })
   if (listings.length === 0) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-16 text-center text-bone-300/60">
-        Sem anúncios para este filtro.
+        Sem anuncios para este filtro.
       </div>
     )
   }
 
+  const featured = listings.filter(l => l.featured === true && l.source !== 'demo')
+  const rest = listings.filter(l => !(l.featured === true && l.source !== 'demo'))
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-      {listings.map((l) => (
-        <ProductCard key={l.id} listing={l} onOpenSeller={onOpenSeller} onView={onView} sellers={sellers} />
-      ))}
+    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+
+      {/* Fila de destaques */}
+      {featured.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-brass-400 font-semibold text-sm">Em Destaque</span>
+            <div className="flex-1 h-px bg-brass-400/20" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {featured.map(l => (
+              <ProductCard key={l.id} listing={l} onOpenSeller={onOpenSeller} onView={onView} sellers={sellers} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Restantes anuncios */}
+      {rest.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {rest.map(l => (
+            <ProductCard key={l.id} listing={l} onOpenSeller={onOpenSeller} onView={onView} sellers={sellers} />
+          ))}
+        </div>
+      )}
+
     </div>
   )
 }
