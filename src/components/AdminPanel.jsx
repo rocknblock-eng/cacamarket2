@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings, Coins, Plus, Minus, Ban, ShieldOff, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings, Coins, Plus, Minus, Ban, ShieldOff, ShieldCheck, Star } from 'lucide-react'
 import { LISTINGS, SELLERS } from '../data/listings.js'
 import { supabase } from '../lib/supabaseClient.js'
 
 const TABS = [
-  { id: 'stats', label: 'Estatísticas', icon: BarChart3 },
+  { id: 'stats', label: 'Estatisticas', icon: BarChart3 },
   { id: 'users', label: 'Utilizadores', icon: Users },
-  { id: 'credits', label: 'Créditos', icon: Coins },
-  { id: 'moderation', label: 'Moderação', icon: ListChecks },
-  { id: 'settings', label: 'Definições', icon: Settings }
+  { id: 'credits', label: 'Creditos', icon: Coins },
+  { id: 'moderation', label: 'Moderacao', icon: ListChecks },
+  { id: 'settings', label: 'Definicoes', icon: Settings }
 ]
 
 export default function AdminPanel({
@@ -33,7 +33,7 @@ export default function AdminPanel({
         <ArrowLeft size={16} /> Voltar ao mercado
       </button>
 
-      <h1 className="font-display font-bold text-2xl text-bone-100 mb-5">Painel de Administração</h1>
+      <h1 className="font-display font-bold text-2xl text-bone-100 mb-5">Painel de Administracao</h1>
 
       <div className="flex flex-wrap gap-2 mb-6">
         {TABS.map((t) => (
@@ -56,7 +56,7 @@ export default function AdminPanel({
       {tab === 'users' && <UsersTab sellers={allSellers} />}
       {tab === 'credits' && <CreditsTab />}
       {tab === 'moderation' && (
-        <ModerationTab listings={allListings} onDeleteListing={onDeleteListing} />
+        <ModerationTab listings={allListings} onDeleteListing={onDeleteListing} dbListings={dbListings} />
       )}
       {tab === 'settings' && (
         <SettingsTab settings={platformSettings} onSaved={onSettingsSaved} />
@@ -67,10 +67,10 @@ export default function AdminPanel({
 
 function StatsTab({ listings, sellers }) {
   const stats = [
-    { label: 'Anúncios ativos', value: listings.length },
+    { label: 'Anuncios ativos', value: listings.length },
     { label: 'Vendedores registados', value: Object.keys(sellers).length },
     { label: 'Vendedores verificados', value: Object.values(sellers).filter((s) => s.verified).length },
-    { label: 'Valor total em anúncios', value: `${listings.reduce((a, l) => a + Number(l.price), 0)} €` }
+    { label: 'Valor total em anuncios', value: `${listings.reduce((a, l) => a + Number(l.price), 0)} EUR` }
   ]
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -113,11 +113,10 @@ function UsersTab() {
   }
 
   async function handleDeleteAccount(user) {
-    if (!window.confirm(`Tens a certeza que queres eliminar a conta de ${user.full_name}? Esta ação não pode ser desfeita.\n\nOs créditos do utilizador serão transferidos para o admin.`)) return
+    if (!window.confirm(`Tens a certeza que queres eliminar a conta de ${user.full_name}? Esta acao nao pode ser desfeita.\n\nOs creditos do utilizador serao transferidos para o admin.`)) return
 
     setActing(user.id)
 
-    // 1. Buscar créditos do utilizador
     const { data: userProfile } = await supabase
       .from('profiles')
       .select('listing_credits')
@@ -126,14 +125,12 @@ function UsersTab() {
 
     const creditsToTransfer = userProfile?.listing_credits || 0
 
-    // 2. Buscar perfil do admin
     const { data: adminProfile } = await supabase
       .from('profiles')
       .select('id, listing_credits')
       .eq('role', 'admin')
       .single()
 
-    // 3. Transferir créditos para o admin (se houver)
     if (creditsToTransfer > 0 && adminProfile) {
       const newAdminCredits = (adminProfile.listing_credits || 0) + creditsToTransfer
       await supabase
@@ -142,17 +139,13 @@ function UsersTab() {
         .eq('id', adminProfile.id)
     }
 
-    // 4. Apagar anuncios do utilizador
     await supabase.from('listings').delete().eq('seller_id', user.id)
-
-    // 5. Apagar perfil
     await supabase.from('profiles').delete().eq('id', user.id)
 
-    // 6. Remover da lista local
     setUsers(prev => prev.filter(u => u.id !== user.id))
     setActing(null)
 
-    alert(`Conta de ${user.full_name} eliminada.${creditsToTransfer > 0 ? ` ${creditsToTransfer} crédito(s) transferido(s) para o admin.` : ''}`)
+    alert(`Conta de ${user.full_name} eliminada.${creditsToTransfer > 0 ? ` ${creditsToTransfer} credito(s) transferido(s) para o admin.` : ''}`)
   }
 
   const roleLabel = (role) => {
@@ -169,7 +162,6 @@ function UsersTab() {
 
   return (
     <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
-      {/* Cabeçalho */}
       <div className="grid grid-cols-[1fr_70px_100px_110px_90px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
         <span>Utilizador</span>
         <span className="text-center">Tipo</span>
@@ -197,7 +189,6 @@ function UsersTab() {
             <span className="text-xs text-bone-300/60 bg-pine-700 px-2 py-0.5 rounded-full">{roleLabel(u.role)}</span>
           </div>
 
-          {/* Suspender / Reativar */}
           <div className="flex justify-center">
             {u.role !== 'admin' && (
               <button
@@ -215,7 +206,6 @@ function UsersTab() {
             )}
           </div>
 
-          {/* Banir / Desbanir */}
           <div className="flex justify-center">
             {u.role !== 'admin' && (
               <button
@@ -233,14 +223,12 @@ function UsersTab() {
             )}
           </div>
 
-          {/* Eliminar conta */}
           <div className="flex justify-center">
             {u.role !== 'admin' && (
               <button
                 onClick={() => handleDeleteAccount(u)}
                 disabled={acting === u.id}
                 className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-red-900/30 text-red-400 hover:bg-red-900/60 transition-colors disabled:opacity-40"
-                title="Eliminar conta permanentemente"
               >
                 <Trash2 size={13} />
                 Eliminar
@@ -268,7 +256,6 @@ function CreditsTab() {
       .from('profiles')
       .select('id, full_name, email, role, listing_credits, free_listing_used, blocked')
       .order('full_name', { ascending: true })
-    // Excluir utilizadores banidos
     if (!error && data) setUsers(data.filter(u => !u.blocked))
     setLoading(false)
   }, [])
@@ -291,7 +278,7 @@ function CreditsTab() {
 
   async function handleAdjust(type) {
     const n = parseInt(amount)
-    if (!n || n <= 0) { setFeedback({ type: 'error', msg: 'Introduz um número válido.' }); return }
+    if (!n || n <= 0) { setFeedback({ type: 'error', msg: 'Introduz um numero valido.' }); return }
     setSaving(true)
     setFeedback(null)
 
@@ -305,9 +292,9 @@ function CreditsTab() {
 
     setSaving(false)
     if (error) {
-      setFeedback({ type: 'error', msg: 'Erro ao atualizar créditos: ' + error.message })
+      setFeedback({ type: 'error', msg: 'Erro ao atualizar creditos: ' + error.message })
     } else {
-      setFeedback({ type: 'success', msg: `Créditos atualizados para ${newCredits}.` })
+      setFeedback({ type: 'success', msg: `Creditos atualizados para ${newCredits}.` })
       setUsers(prev => prev.map(u => u.id === adjusting.id ? { ...u, listing_credits: newCredits } : u))
       setTimeout(closeAdjust, 1200)
     }
@@ -337,9 +324,9 @@ function CreditsTab() {
         <div className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
           <span>Utilizador</span>
           <span className="text-center">Tipo</span>
-          <span className="text-center">Créditos</span>
-          <span className="text-center">1.º Grátis</span>
-          <span className="text-center">Ação</span>
+          <span className="text-center">Creditos</span>
+          <span className="text-center">1. Gratis</span>
+          <span className="text-center">Acao</span>
         </div>
 
         {users.length === 0 && (
@@ -354,23 +341,17 @@ function CreditsTab() {
               <div className="text-bone-100 text-sm font-medium truncate">{u.full_name || '—'}</div>
               <div className="text-bone-300/50 text-xs truncate">{u.email || '—'}</div>
             </div>
-
             <div className="flex justify-center">
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${roleColor(u.role)}`}>
                 {roleLabel(u.role)}
               </span>
             </div>
-
             <div className="text-center font-display font-bold text-blaze-400 text-lg">
               {u.listing_credits ?? 0}
             </div>
-
             <div className="text-center text-sm">
-              {u.role === 'particular'
-                ? (u.free_listing_used ? '✅' : '⬜')
-                : '—'}
+              {u.role === 'particular' ? (u.free_listing_used ? '✅' : '⬜') : '—'}
             </div>
-
             <div className="flex justify-center">
               <button
                 onClick={() => openAdjust(u)}
@@ -387,13 +368,12 @@ function CreditsTab() {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-pine-800 border border-pine-600 rounded-2xl w-full max-w-sm p-6 space-y-4">
             <h3 className="text-bone-100 font-display font-bold text-base">
-              Ajustar créditos — {adjusting.full_name}
+              Ajustar creditos — {adjusting.full_name}
             </h3>
             <div className="bg-pine-700/50 rounded-lg px-3 py-2 text-sm">
-              <span className="text-bone-300/70">Créditos actuais: </span>
+              <span className="text-bone-300/70">Creditos actuais: </span>
               <span className="text-blaze-400 font-bold">{adjusting.listing_credits ?? 0}</span>
             </div>
-
             <div>
               <label className="text-xs text-bone-300/70 block mb-1">Quantidade</label>
               <input
@@ -405,41 +385,37 @@ function CreditsTab() {
                 className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 outline-none focus:border-blaze-500 w-full"
               />
             </div>
-
             <div>
               <label className="text-xs text-bone-300/70 block mb-1">Motivo (opcional)</label>
               <input
                 type="text"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Ex: Bónus de boas-vindas"
+                placeholder="Ex: Bonus de boas-vindas"
                 className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 outline-none focus:border-blaze-500 w-full"
               />
             </div>
-
             {feedback && (
               <p className={`text-xs ${feedback.type === 'success' ? 'text-brass-400' : 'text-red-400'}`}>
                 {feedback.msg}
               </p>
             )}
-
             <div className="flex gap-2">
               <button
                 onClick={() => handleAdjust('add')}
                 disabled={saving}
                 className="flex-1 flex items-center justify-center gap-1.5 bg-brass-500 hover:bg-brass-400 disabled:opacity-50 text-pine-950 font-semibold text-sm py-2.5 rounded-lg transition-colors"
               >
-                <Plus size={15} /> Bónus
+                <Plus size={15} /> Bonus
               </button>
               <button
                 onClick={() => handleAdjust('remove')}
                 disabled={saving}
                 className="flex-1 flex items-center justify-center gap-1.5 bg-red-500/80 hover:bg-red-500 disabled:opacity-50 text-white font-semibold text-sm py-2.5 rounded-lg transition-colors"
               >
-                <Minus size={15} /> Penalização
+                <Minus size={15} /> Penalizacao
               </button>
             </div>
-
             <button
               onClick={closeAdjust}
               className="w-full text-bone-300/60 hover:text-bone-100 text-sm py-1 transition-colors"
@@ -493,28 +469,23 @@ function SettingsTab({ settings, onSaved }) {
   return (
     <div className="bg-pine-800 border border-pine-700 rounded-xl p-5 max-w-md space-y-4">
       <div>
-        <h3 className="text-bone-100 font-semibold text-sm mb-2">Período gratuito de lançamento</h3>
+        <h3 className="text-bone-100 font-semibold text-sm mb-2">Periodo gratuito de lancamento</h3>
         <div className="bg-pine-700/50 rounded-lg px-3 py-2 mb-3 text-xs">
           <div className="font-semibold text-bone-100 mb-1">
-            {isCurrentlyFree ? '🟢 ESTADO: Grátis para todos' : '🔴 ESTADO: Cobrança ativa'}
+            {isCurrentlyFree ? 'ESTADO: Gratis para todos' : 'ESTADO: Cobranca ativa'}
           </div>
           <div className="text-bone-300/70">
             {isCurrentlyFree
-              ? launchDate
-                ? `Grátis até ${freeUntilText}`
-                : 'Sem data definida = sempre grátis'
-              : 'Período de graça terminou. Preços ativos.'}
+              ? launchDate ? `Gratis ate ${freeUntilText}` : 'Sem data definida = sempre gratis'
+              : 'Periodo de graca terminou. Precos ativos.'}
           </div>
         </div>
         <p className="text-bone-300/70 text-xs mb-3">
-          Enquanto nenhuma data estiver definida, publicar é grátis para toda a gente. Assim que
-          definirem uma data, o site fica grátis durante {freeDays} dias a partir dessa data —
-          depois disso, aplicam-se as regras de preços (1€ particular, 5€ pacote loja).
+          Enquanto nenhuma data estiver definida, publicar e gratis para toda a gente.
         </p>
       </div>
-
       <div>
-        <label className="text-xs text-bone-300/70 block mb-1">Data de lançamento ao público</label>
+        <label className="text-xs text-bone-300/70 block mb-1">Data de lancamento ao publico</label>
         <input
           type="date"
           value={launchDate ?? ''}
@@ -522,11 +493,9 @@ function SettingsTab({ settings, onSaved }) {
           className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 outline-none focus:border-blaze-500 w-full"
         />
       </div>
-
       {freeUntilText && (
-        <p className="text-xs text-brass-400">Data definida — será grátis para todos até <strong>{freeUntilText}</strong>.</p>
+        <p className="text-xs text-brass-400">Data definida — sera gratis para todos ate <strong>{freeUntilText}</strong>.</p>
       )}
-
       <div className="flex items-center gap-3">
         <button
           onClick={handleSave}
@@ -541,24 +510,69 @@ function SettingsTab({ settings, onSaved }) {
   )
 }
 
-function ModerationTab({ listings, onDeleteListing }) {
+function ModerationTab({ listings, onDeleteListing, dbListings }) {
+  const [featuredIds, setFeaturedIds] = useState(
+    new Set(dbListings.filter(l => l.featured).map(l => l.id))
+  )
+  const [toggling, setToggling] = useState(null)
+
+  async function toggleFeatured(listing) {
+    const isFeatured = featuredIds.has(listing.id)
+    setToggling(listing.id)
+    await supabase
+      .from('listings')
+      .update({ featured: !isFeatured })
+      .eq('id', listing.id)
+    setFeaturedIds(prev => {
+      const next = new Set(prev)
+      isFeatured ? next.delete(listing.id) : next.add(listing.id)
+      return next
+    })
+    setToggling(null)
+  }
+
   return (
     <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
       {listings.map((l) => (
         <div key={l.id} className="flex items-center justify-between px-4 py-3 border-b border-pine-700 last:border-0 gap-3">
-          <div className="min-w-0">
-            <div className="text-bone-100 text-sm font-medium truncate">{l.title}</div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-bone-100 text-sm font-medium truncate">{l.title}</span>
+              {featuredIds.has(l.id) && (
+                <span className="text-[10px] bg-brass-400/20 text-brass-400 px-1.5 py-0.5 rounded-full shrink-0">Destaque</span>
+              )}
+            </div>
             <div className="text-bone-300/60 text-xs">
               {l.price} € {l.source === 'demo' && '· Artigo de exemplo'}
             </div>
           </div>
-          <button
-            onClick={() => onDeleteListing(l)}
-            className="text-red-400 hover:text-red-300 shrink-0"
-            title="Apagar anúncio"
-          >
-            <Trash2 size={18} />
-          </button>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Botao destaque — so para anuncios reais */}
+            {l.source !== 'demo' && (
+              <button
+                onClick={() => toggleFeatured(l)}
+                disabled={toggling === l.id}
+                className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40 ${
+                  featuredIds.has(l.id)
+                    ? 'bg-brass-400/20 text-brass-400 hover:bg-brass-400/10'
+                    : 'bg-pine-700 text-bone-300/60 hover:bg-brass-400/20 hover:text-brass-400'
+                }`}
+                title={featuredIds.has(l.id) ? 'Remover destaque' : 'Colocar em destaque'}
+              >
+                <Star size={13} className={featuredIds.has(l.id) ? 'fill-brass-400' : ''} />
+                {featuredIds.has(l.id) ? 'Destaque' : 'Destacar'}
+              </button>
+            )}
+
+            <button
+              onClick={() => onDeleteListing(l)}
+              className="text-red-400 hover:text-red-300 shrink-0"
+              title="Apagar anuncio"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
         </div>
       ))}
     </div>
