@@ -147,7 +147,7 @@ export default function App() {
   const loadListings = useCallback(async () => {
     const { data, error } = await supabase
       .from('listings')
-      .select('id, title, category, price, condition, description, image_url, image_urls, seller_id, created_at, expires_at, profiles(id, full_name, role, verified, rating, reviews_count, location, member_since, phone, email)')
+      .select('id, title, category, price, condition, description, image_url, image_urls, seller_id, created_at, expires_at, featured, profiles(id, full_name, role, verified, rating, reviews_count, location, member_since, phone, email)')
       .order('created_at', { ascending: false })
 
     if (error || !data) return
@@ -166,7 +166,8 @@ export default function App() {
       image_url: row.image_url,
       image_urls: row.image_urls || null,
       description: row.description,
-      source: 'db'
+      featured: row.featured || false,
+        source: 'db'
     }))
 
     const sellersFromDb = {}
