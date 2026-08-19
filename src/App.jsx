@@ -460,3 +460,85 @@ export default function App() {
             alt=""
             className="max-w-[95vw] max-h-[90vh] object-contain"
             onClick={e => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setLightbox(null)}
+            className="absolute top-4 right-4 text-white hover:text-orange-400 bg-black/50 rounded-full p-2"
+          >
+            <X size={24} />
+          </button>
+          {lightbox.images.length > 1 && (
+            <>
+              <button
+                onClick={e => { e.stopPropagation(); setLightbox(l => ({ ...l, index: (l.index - 1 + l.images.length) % l.images.length })) }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full p-2"
+              >
+                <ChevronLeft size={24} />
+              </button>
+              <button
+                onClick={e => { e.stopPropagation(); setLightbox(l => ({ ...l, index: (l.index + 1) % l.images.length })) }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full p-2"
+              >
+                <ChevronRight size={24} />
+              </button>
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm px-3 py-1 rounded-full">
+                {lightbox.index + 1} / {lightbox.images.length}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+      {inboxOpen && user && (
+        <InboxModal
+          user={user}
+          profile={profile}
+          onClose={() => setInboxOpen(false)}
+          onOpenChat={(conv) => {
+            setInboxOpen(false)
+            setActiveChat({
+              listing: conv.listings,
+              seller: conv.seller,
+              conversationId: conv.id
+            })
+          }}
+        />
+      )}
+      {legalOpen && (
+        <LegalModal
+          initialTab={legalOpen}
+          onClose={() => setLegalOpen(null)}
+        />
+      )}
+      {activeChat && user && (
+        <ChatModal
+          user={user}
+          profile={profile}
+          listing={activeChat.listing}
+          seller={activeChat.seller}
+          conversationId={activeChat.conversationId}
+          onClose={() => { setActiveChat(null); loadUnreadCount() }}
+        />
+      )}
+
+      <footer className="border-t border-pine-700 mt-8 py-5 text-center">
+        <div className="flex items-center justify-center gap-4 text-xs text-bone-300/40">
+          <button
+            onClick={() => setLegalOpen('terms')}
+            className="hover:text-bone-200 transition-colors underline underline-offset-2"
+          >
+            Termos e Condições
+          </button>
+          <span>·</span>
+          <button
+            onClick={() => setLegalOpen('privacy')}
+            className="hover:text-bone-200 transition-colors underline underline-offset-2"
+          >
+            Política de Privacidade
+          </button>
+          <span>·</span>
+          <span>© {new Date().getFullYear()} WildMarket</span>
+        </div>
+      </footer>
+    </div>
+  )
+}
