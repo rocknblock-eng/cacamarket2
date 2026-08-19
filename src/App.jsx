@@ -24,31 +24,29 @@ function roleToType(role) {
   return 'Particular'
 }
 
-// Detetar se estamos na página de reset de password
 const isResetPasswordPage = window.location.pathname === '/reset-password'
 
 export default function App() {
-  // Se o URL for /reset-password, mostra são essa pÃ¡gina
   if (isResetPasswordPage) {
     return <ResetPassword />
   }
 
-  const [view, setView] = useState('market') // 'market' | 'admin'
+  const [view, setView] = useState('market')
   const [category, setCategory] = useState(null)
   const [search, setSearch] = useState('')
   const [selectedSeller, setSelectedSeller] = useState(null)
   const [authOpen, setAuthOpen] = useState(false)
   const [sellOpen, setSellOpen] = useState(false)
   const [payWallOpen, setPayWallOpen] = useState(false)
-  const [paypalStatus, setPaypalStatus] = useState(null) // null | 'confirming' | 'success' | 'error'
+  const [paypalStatus, setPaypalStatus] = useState(null)
   const [viewingListing, setViewingListing] = useState(null)
   const [editingListing, setEditingListing] = useState(null)
   const [profileOpen, setProfileOpen] = useState(false)
   const [inboxOpen, setInboxOpen] = useState(false)
   const [activeChat, setActiveChat] = useState(null)
   const [unreadCount, setUnreadCount] = useState(0)
-  const [legalOpen, setLegalOpen] = useState(null) // 'terms' | 'privacy' | null
-  const [lightbox, setLightbox] = useState(null) // { images: [], index: number } | null
+  const [legalOpen, setLegalOpen] = useState(null)
+  const [lightbox, setLightbox] = useState(null)
 
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -69,7 +67,7 @@ export default function App() {
         .single()
 
       if (error) {
-        console.warn('Platform settings não carregaram (esperado se tabela vazia):', error.message)
+        console.warn('Platform settings não carregaram:', error.message)
       } else if (data) {
         setPlatformSettings(data)
       }
@@ -95,10 +93,10 @@ export default function App() {
   }, [platformSettings, settingsLoaded])
 
   useEffect(() => {
-  supabase.auth.getSession().then(({ data }) => {
-    setUser(data.session?.user ?? null)
-    setAuthLoading(false)
-  })
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null)
+      setAuthLoading(false)
+    })
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
@@ -158,19 +156,19 @@ export default function App() {
     const mappedListings = data
       .filter(row => !row.expires_at || new Date(row.expires_at) > now)
       .map((row) => ({
-      id: row.id,
-      title: row.title,
-      category: row.category,
-      price: row.price,
-      sellerId: row.seller_id,
-      condition: row.condition,
-      image: row.image_url,
-      image_url: row.image_url,
-      image_urls: row.image_urls || null,
-      description: row.description,
-      featured: row.featured || false,
+        id: row.id,
+        title: row.title,
+        category: row.category,
+        price: row.price,
+        sellerId: row.seller_id,
+        condition: row.condition,
+        image: row.image_url,
+        image_url: row.image_url,
+        image_urls: row.image_urls || null,
+        description: row.description,
+        featured: row.featured || false,
         source: 'db'
-    }))
+      }))
 
     const sellersFromDb = {}
     data.forEach((row) => {
@@ -183,8 +181,8 @@ export default function App() {
         verified: p.verified,
         rating: p.rating || 0,
         reviews: p.reviews_count || 0,
-        location: p.location || 'â€”',
-        memberSince: p.member_since ? new Date(p.member_since).getFullYear().toString() : 'â€”',
+        location: p.location || '-',
+        memberSince: p.member_since ? new Date(p.member_since).getFullYear().toString() : '-',
         phone: p.phone || null,
         email: p.email || null
       }
@@ -294,7 +292,7 @@ export default function App() {
 
     const { error } = await supabase.from('listings').delete().eq('id', listing.id)
     if (error) {
-      alert('Não foi possí­vel apagar o anúncio. Tenta novamente.')
+      alert('Não foi possível apagar o anúncio. Tenta novamente.')
       return
     }
 
@@ -335,7 +333,7 @@ export default function App() {
 
       {view === 'admin' && profile?.role !== 'admin' ? (
         <div className="max-w-6xl mx-auto px-4 py-16 text-center text-bone-300/60">
-          NÃ£o tens permissÃ£o para aceder ao painel de administraÃ§Ã£o.
+          Não tens permissão para aceder ao painel de administração.
         </div>
       ) : view === 'market' ? (
         <>
@@ -386,7 +384,7 @@ export default function App() {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
           <div className="bg-pine-800 border border-pine-600 rounded-xl px-6 py-5 text-center max-w-xs">
             <p className="text-bone-100 text-sm mb-3">
-              NÃ£o foi possÃ­vel confirmar o pagamento. Se o dinheiro foi debitado, contacta-nos.
+              Não foi possível confirmar o pagamento. Se o dinheiro foi debitado, contacta-nos.
             </p>
             <button
               onClick={() => setPaypalStatus(null)}
@@ -415,7 +413,7 @@ export default function App() {
             refreshProfile(user.id)
           }}
         />
-      )}      
+      )}
       <ProductDetailModal
         key={viewingListing?.id || 'none'}
         listing={viewingListing}
@@ -462,86 +460,3 @@ export default function App() {
             alt=""
             className="max-w-[95vw] max-h-[90vh] object-contain"
             onClick={e => e.stopPropagation()}
-          />
-          <button
-            onClick={() => setLightbox(null)}
-            className="absolute top-4 right-4 text-white hover:text-orange-400 bg-black/50 rounded-full p-2"
-          >
-            <X size={24} />
-          </button>
-          {lightbox.images.length > 1 && (
-            <>
-              <button
-                onClick={e => { e.stopPropagation(); setLightbox(l => ({ ...l, index: (l.index - 1 + l.images.length) % l.images.length })) }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full p-2"
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <button
-                onClick={e => { e.stopPropagation(); setLightbox(l => ({ ...l, index: (l.index + 1) % l.images.length })) }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white rounded-full p-2"
-              >
-                <ChevronRight size={24} />
-              </button>
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm px-3 py-1 rounded-full">
-                {lightbox.index + 1} / {lightbox.images.length}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-      {inboxOpen && user && (
-        <InboxModal
-          user={user}
-          profile={profile}
-          onClose={() => setInboxOpen(false)}
-          onOpenChat={(conv) => {
-            setInboxOpen(false)
-            setActiveChat({
-              listing: conv.listings,
-              seller: conv.seller,
-              conversationId: conv.id
-            })
-          }}
-        />
-      )}
-      {legalOpen && (
-        <LegalModal
-          initialTab={legalOpen}
-          onClose={() => setLegalOpen(null)}
-        />
-      )}
-
-      {activeChat && user && (
-        <ChatModal
-          user={user}
-          profile={profile}
-          listing={activeChat.listing}
-          seller={activeChat.seller}
-          conversationId={activeChat.conversationId}
-          onClose={() => { setActiveChat(null); loadUnreadCount() }}
-        />
-      )}
-
-      <footer className="border-t border-pine-700 mt-8 py-5 text-center">
-        <div className="flex items-center justify-center gap-4 text-xs text-bone-300/40">
-          <button
-            onClick={() => setLegalOpen('terms')}
-            className="hover:text-bone-200 transition-colors underline underline-offset-2"
-          >
-            Termos e Condições
-          </button>
-          <span>·</span>
-          <button
-            onClick={() => setLegalOpen('privacy')}
-            className="hover:text-bone-200 transition-colors underline underline-offset-2"
-          >
-            Polí­tica de Privacidade
-          </button>
-          <span>·</span>
-          <span>© {new Date().getFullYear()} WildMarket</span>
-        </div>
-      </footer>
-    </div>
-  )
-}
