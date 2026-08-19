@@ -1,8 +1,6 @@
-import { X, Star, ShieldCheck, MapPin, Calendar } from 'lucide-react'
-
+import { X, ShieldCheck, MapPin, Calendar } from 'lucide-react'
 export default function SellerProfileModal({ seller, onClose }) {
   if (!seller) return null
-
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="bg-pine-800 border border-pine-600 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-5 relative">
@@ -12,7 +10,6 @@ export default function SellerProfileModal({ seller, onClose }) {
         >
           <X size={20} />
         </button>
-
         <div className="flex items-center gap-3 mb-4">
           <div className="w-14 h-14 rounded-full bg-pine-700 flex items-center justify-center font-display font-bold text-xl text-bone-100">
             {seller.name.charAt(0)}
@@ -25,16 +22,8 @@ export default function SellerProfileModal({ seller, onClose }) {
             <span className="text-xs text-bone-300/70">{seller.type}</span>
           </div>
         </div>
-
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="bg-pine-700/50 rounded-lg p-3 flex items-center gap-2">
-            <Star size={16} className="text-blaze-400" fill="currentColor" />
-            <div>
-              <div className="text-bone-100 font-semibold">{seller.rating}</div>
-              <div className="text-bone-300/60 text-[11px]">{seller.reviews} avaliações</div>
-            </div>
-          </div>
-          <div className="bg-pine-700/50 rounded-lg p-3 flex items-center gap-2">
+          <div className="bg-pine-700/50 rounded-lg p-3 flex items-center gap-2 col-span-2">
             <MapPin size={16} className="text-blaze-400" />
             <div className="text-bone-100">{seller.location}</div>
           </div>
@@ -43,10 +32,9 @@ export default function SellerProfileModal({ seller, onClose }) {
             <div className="text-bone-100 text-xs">Membro desde {seller.memberSince}</div>
           </div>
         </div>
-
         {!seller.verified && (
           <p className="text-[11px] text-bone-300/60 mt-4">
-            Este vendedor ainda não completou a verificação de identidade.
+            Este vendedor ainda não completou a verificacao de identidade.
           </p>
         )}
       </div>
