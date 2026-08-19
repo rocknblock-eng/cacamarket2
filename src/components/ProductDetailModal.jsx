@@ -171,8 +171,11 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
             </p>
           )}
 
-          {/* Vendedor — só para utilizadores registados */}
-          {isLoggedIn ? (
+          {authLoading ? (
+            <div className="bg-pine-700/30 rounded-lg p-4 text-center">
+              <p className="text-bone-300/40 text-sm">A carregar...</p>
+            </div>
+          ) : isLoggedIn ? (
             <button
               onClick={() => onOpenSeller(seller)}
               className="flex items-center justify-between gap-2 bg-pine-700/50 hover:bg-pine-700 rounded-lg p-3 transition-colors text-left"
@@ -201,7 +204,6 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
             </div>
           )}
 
-          {/* Botão chat interno */}
           {isLoggedIn && (!isSeller || isAdmin) && (
             <button
               onClick={() => onOpenChat(listing, seller)}
@@ -212,7 +214,6 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
             </button>
           )}
 
-          {/* Contactos externos */}
           {isLoggedIn && (!isSeller || isAdmin) && (
             <>
               <button
