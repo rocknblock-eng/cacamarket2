@@ -52,6 +52,7 @@ export default function App() {
 
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
 
   const [dbListings, setDbListings] = useState([])
   const [deletedDemoIds, setDeletedDemoIds] = useState([])
@@ -94,9 +95,10 @@ export default function App() {
   }, [platformSettings, settingsLoaded])
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null)
-    })
+  supabase.auth.getSession().then(({ data }) => {
+    setUser(data.session?.user ?? null)
+    setAuthLoading(false)
+  })
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
@@ -417,6 +419,9 @@ export default function App() {
       <ProductDetailModal
         key={viewingListing?.id || 'none'}
         listing={viewingListing}
+        ...
+        user={user}
+        authLoading={authLoading}
         onClose={() => setViewingListing(null)}
         onOpenSeller={setSelectedSeller}
         onOpenChat={(listing, seller) => {
