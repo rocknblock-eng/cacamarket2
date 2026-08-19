@@ -1,12 +1,9 @@
-import { MapPin, ShieldCheck, Star } from 'lucide-react'
-
+import { MapPin, Star } from 'lucide-react'
 export default function ProductCard({ listing, onOpenSeller, onView, sellers }) {
   const seller = sellers[listing.sellerId]
   if (!seller) return null
-
   const isDemo = listing.source === 'demo'
   const isFeatured = listing.featured === true
-
   return (
     <div className={`bg-pine-800 rounded-xl overflow-hidden flex flex-col transition-colors ${
       isFeatured
@@ -22,16 +19,12 @@ export default function ProductCard({ listing, onOpenSeller, onView, sellers }) 
         ) : (
           'Sem imagem'
         )}
-
-        {/* Badge destaque */}
         {isFeatured && (
           <div className="absolute top-2 left-2 flex items-center gap-1 bg-brass-400 text-pine-950 text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
             <Star size={10} className="fill-pine-950" />
             Destaque
           </div>
         )}
-
-        {/* Marca d'agua nos anuncios de demonstracao */}
         {isDemo && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <span
@@ -43,7 +36,6 @@ export default function ProductCard({ listing, onOpenSeller, onView, sellers }) 
           </div>
         )}
       </button>
-
       <div className="p-3 flex flex-col gap-2 flex-1">
         <h3 className="text-bone-100 text-sm font-medium leading-snug line-clamp-2">
           {listing.title}
@@ -51,13 +43,6 @@ export default function ProductCard({ listing, onOpenSeller, onView, sellers }) 
         <div className="text-blaze-400 font-display font-bold text-lg">
           {listing.price} €
         </div>
-        <button
-          onClick={() => onOpenSeller(seller)}
-          className="flex items-center gap-1.5 text-xs text-bone-300 hover:text-blaze-400 transition-colors text-left"
-        >
-          {seller.verified && <ShieldCheck size={13} className="text-brass-400 shrink-0" />}
-          <span className="truncate">{seller.name}</span>
-        </button>
         <div className="flex items-center gap-1 text-[11px] text-bone-300/60">
           <MapPin size={11} />
           {seller.location}
