@@ -131,6 +131,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
   const seller = sellers[listing.sellerId]
   if (!seller) return null
 
+  const isLoggedIn = user !== null && user !== undefined
   const hasContact = seller.phone || seller.email
   const isSeller = user?.id === listing.sellerId
   const isAdmin = profile?.role === 'admin'
@@ -171,7 +172,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
           )}
 
           {/* Vendedor — só para utilizadores registados */}
-          {user ? (
+          {isLoggedIn ? (
             <button
               onClick={() => onOpenSeller(seller)}
               className="flex items-center justify-between gap-2 bg-pine-700/50 hover:bg-pine-700 rounded-lg p-3 transition-colors text-left"
@@ -201,7 +202,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
           )}
 
           {/* Botão chat interno */}
-          {user && (!isSeller || isAdmin) && (
+          {isLoggedIn && (!isSeller || isAdmin) && (
             <button
               onClick={() => onOpenChat(listing, seller)}
               className="w-full flex items-center justify-center gap-2 bg-blaze-500 hover:bg-blaze-400 text-pine-950 text-sm font-semibold py-3 rounded-lg transition-colors"
@@ -212,7 +213,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
           )}
 
           {/* Contactos externos */}
-          {user && (!isSeller || isAdmin) && (
+          {isLoggedIn && (!isSeller || isAdmin) && (
             <>
               <button
                 onClick={() => setShowContact((v) => !v)}
