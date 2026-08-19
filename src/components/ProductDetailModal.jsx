@@ -123,7 +123,7 @@ function PhotoGallery({ listing, onOpenLightbox }) {
   )
 }
 
-export default function ProductDetailModal({ listing, onClose, onOpenSeller, onOpenChat, sellers, onDelete, canDelete, onEdit, user, profile, onOpenLightbox }) {
+export default function ProductDetailModal({ listing, onClose, onOpenSeller, onOpenChat, sellers, onDelete, canDelete, onEdit, user, profile, onOpenLightbox, authLoading }) {
   const [showContact, setShowContact] = useState(false)
 
   if (!listing) return null
@@ -131,7 +131,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
   const seller = sellers[listing.sellerId]
   if (!seller) return null
 
-  const isLoggedIn = user !== null && user !== undefined
+  const isLoggedIn = !authLoading && user !== null && user !== undefined
   const hasContact = seller.phone || seller.email
   const isSeller = user?.id === listing.sellerId
   const isAdmin = profile?.role === 'admin'
