@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, MapPin, ShieldCheck, Star, Trash2, Pencil, MessageCircle, Mail, Phone, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
+import { X, MapPin, ShieldCheck, Trash2, Pencil, MessageCircle, Mail, Phone, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
 
 function whatsappLink(phone, listingTitle) {
   const digits = phone.replace(/[^\d]/g, '')
@@ -45,7 +45,6 @@ function PhotoGallery({ listing, onOpenLightbox }) {
 
   return (
     <>
-      {/* Imagem principal */}
       <div className="aspect-[4/3] bg-pine-700 relative overflow-hidden group">
         <img
           src={images[current]}
@@ -63,7 +62,6 @@ function PhotoGallery({ listing, onOpenLightbox }) {
         )}
       </div>
 
-      {/* Miniaturas */}
       {images.length > 1 && (
         <div className="flex gap-2 px-4 pt-2">
           {images.map((img, i) => (
@@ -83,7 +81,6 @@ function PhotoGallery({ listing, onOpenLightbox }) {
         </div>
       )}
 
-      {/* Lightbox */}
       {lightbox && (
         <div
           style={{ position: 'fixed', inset: 0, zIndex: 99999, background: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -173,34 +170,37 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
             </p>
           )}
 
-          <button
-            onClick={() => onOpenSeller(seller)}
-            className="flex items-center justify-between gap-2 bg-pine-700/50 hover:bg-pine-700 rounded-lg p-3 transition-colors text-left"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-pine-700 flex items-center justify-center font-display font-bold text-bone-100 shrink-0">
-                {seller.name.charAt(0)}
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-bone-100 text-sm font-medium truncate">{seller.name}</span>
-                  {seller.verified && <ShieldCheck size={13} className="text-brass-400 shrink-0" />}
+          {/* Vendedor — só para utilizadores registados */}
+          {user ? (
+            <button
+              onClick={() => onOpenSeller(seller)}
+              className="flex items-center justify-between gap-2 bg-pine-700/50 hover:bg-pine-700 rounded-lg p-3 transition-colors text-left"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-9 h-9 rounded-full bg-pine-700 flex items-center justify-center font-display font-bold text-bone-100 shrink-0">
+                  {seller.name.charAt(0)}
                 </div>
-                <div className="flex items-center gap-2 text-[11px] text-bone-300/60">
-                  <span className="flex items-center gap-0.5">
-                    <Star size={11} className="text-blaze-400" fill="currentColor" />
-                    {seller.rating}
-                  </span>
-                  <span className="flex items-center gap-0.5">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-bone-100 text-sm font-medium truncate">{seller.name}</span>
+                    {seller.verified && <ShieldCheck size={13} className="text-brass-400 shrink-0" />}
+                  </div>
+                  <div className="flex items-center gap-1 text-[11px] text-bone-300/60">
                     <MapPin size={11} />
                     {seller.location}
-                  </span>
+                  </div>
                 </div>
               </div>
+            </button>
+          ) : (
+            <div className="bg-pine-700/30 rounded-lg p-4 text-center">
+              <p className="text-bone-300/70 text-sm">
+                <span className="font-semibold text-blaze-400">Regista-te</span> para ver o vendedor e entrar em contacto.
+              </p>
             </div>
-          </button>
+          )}
 
-          {/* Botão chat interno — só para utilizadores registados que não são o vendedor */}
+          {/* Botão chat interno */}
           {user && (!isSeller || isAdmin) && (
             <button
               onClick={() => onOpenChat(listing, seller)}
@@ -211,7 +211,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
             </button>
           )}
 
-          {/* Contactos externos (WhatsApp, telefone, email) */}
+          {/* Contactos externos */}
           {user && (!isSeller || isAdmin) && (
             <>
               <button
@@ -229,7 +229,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
                     </p>
                   )}
                   {seller.phone && (
-                    <a
+                    
                       href={whatsappLink(seller.phone, listing.title)}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -240,7 +240,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
                     </a>
                   )}
                   {seller.phone && (
-                    <a
+                    
                       href={`tel:${seller.phone}`}
                       className="flex items-center gap-2 bg-pine-700 hover:bg-pine-600 text-bone-100 text-sm font-semibold py-2.5 px-3 rounded-lg transition-colors"
                     >
@@ -249,7 +249,7 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
                     </a>
                   )}
                   {seller.email && (
-                    <a
+                    
                       href={emailLink(seller.email, listing.title)}
                       className="flex items-center gap-2 bg-pine-700 hover:bg-pine-600 text-bone-100 text-sm font-semibold py-2.5 px-3 rounded-lg transition-colors"
                     >
@@ -260,13 +260,6 @@ export default function ProductDetailModal({ listing, onClose, onOpenSeller, onO
                 </div>
               )}
             </>
-          )}
-
-          {/* Sem sessão — convida a registar */}
-          {!user && (
-            <p className="text-xs text-bone-300/50 text-center">
-              Regista-te para contactar o vendedor.
-            </p>
           )}
 
           {canEdit && (
