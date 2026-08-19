@@ -415,13 +415,10 @@ export default function App() {
             refreshProfile(user.id)
           }}
         />
-      )}
+      )}      
       <ProductDetailModal
         key={viewingListing?.id || 'none'}
         listing={viewingListing}
-        ...
-        user={user}
-        authLoading={authLoading}
         onClose={() => setViewingListing(null)}
         onOpenSeller={setSelectedSeller}
         onOpenChat={(listing, seller) => {
@@ -431,6 +428,7 @@ export default function App() {
         sellers={allSellers}
         user={user}
         profile={profile}
+        authLoading={authLoading}
         onEdit={(listing) => { setViewingListing(null); setEditingListing(listing) }}
         onDelete={handleDeleteListing}
         canDelete={
