@@ -67,10 +67,10 @@ export default function AdminPanel({
 
 function StatsTab({ listings, sellers }) {
   const stats = [
-    { label: 'anúncios ativos', value: listings.length },
+    { label: 'anÃºncios ativos', value: listings.length },
     { label: 'Vendedores registados', value: Object.keys(sellers).length },
     { label: 'Vendedores verificados', value: Object.values(sellers).filter((s) => s.verified).length },
-    { label: 'Valor total em anúncios', value: `${listings.reduce((a, l) => a + Number(l.price), 0)} EUR` }
+    { label: 'Valor total em anÃºncios', value: `${listings.reduce((a, l) => a + Number(l.price), 0)} EUR` }
   ]
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -179,11 +179,11 @@ function UsersTab() {
         <div key={u.id} className={`grid grid-cols-[1fr_70px_100px_110px_90px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0 ${u.blocked ? 'opacity-50' : ''}`}>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="text-bone-100 text-sm font-medium truncate">{u.full_name || '—'}</span>
+              <span className="text-bone-100 text-sm font-medium truncate">{u.full_name || 'â€”'}</span>
               {u.blocked && <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full shrink-0">Banido</span>}
               {u.suspended && !u.blocked && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded-full shrink-0">Suspenso</span>}
             </div>
-            <div className="text-bone-300/50 text-xs truncate">{u.email || '—'}</div>
+            <div className="text-bone-300/50 text-xs truncate">{u.email || 'â€”'}</div>
           </div>
 
           <div className="flex justify-center">
@@ -284,12 +284,15 @@ function CreditsTab() {
     setFeedback(null)
 
     const delta = type === 'add' ? n : -n
-    const newCredits = Math.max(0, (adjusting.listing_credits || 0) + delta)
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ listing_credits: newCredits })
-      .eq('id', adjusting.id)
+    // Usa a funÃ§Ã£o admin_adjust_credits (em vez de um update direto) para que
+    // este ajuste fique automaticamente registado na conta corrente do utilizador.
+    const { data: newCredits, error } = await supabase
+      .rpc('admin_adjust_credits', {
+        target_user_id: adjusting.id,
+        delta,
+        reason: reason || null
+      })
 
     setSaving(false)
     if (error) {
@@ -299,6 +302,34 @@ function CreditsTab() {
       setUsers(prev => prev.map(u => u.id === adjusting.id ? { ...u, listing_credits: newCredits } : u))
       setTimeout(closeAdjust, 1200)
     }
+  }
+
+  const [ledgerUser, setLedgerUser] = useState(null)
+  const [ledger, setLedger] = useState([])
+  const [ledgerLoading, setLedgerLoading] = useState(false)
+
+  async function openLedger(user) {
+    setLedgerUser(user)
+    setLedgerLoading(true)
+    const { data, error } = await supabase
+      .from('credit_transactions')
+      .select('id, type, amount, balance_after, description, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+    if (!error && data) setLedger(data)
+    setLedgerLoading(false)
+  }
+
+  function closeLedger() {
+    setLedgerUser(null)
+    setLedger([])
+  }
+
+  const typeLabel = (type) => {
+    if (type === 'compra_paypal') return 'Compra PayPal'
+    if (type === 'ajuste_admin') return 'Ajuste admin'
+    if (type === 'saldo_inicial') return 'Saldo inicial'
+    return type
   }
 
   const roleLabel = (role) => {
@@ -322,7 +353,7 @@ function CreditsTab() {
   return (
     <div className="space-y-4">
       <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
-        <div className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
+        <div className="grid grid-cols-[1fr_70px_70px_70px_170px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
           <span>Utilizador</span>
           <span className="text-center">Tipo</span>
           <span className="text-center">Creditos</span>
@@ -337,10 +368,10 @@ function CreditsTab() {
         )}
 
         {users.map((u) => (
-          <div key={u.id} className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0">
+          <div key={u.id} className="grid grid-cols-[1fr_70px_70px_70px_170px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0">
             <div className="min-w-0">
-              <div className="text-bone-100 text-sm font-medium truncate">{u.full_name || '—'}</div>
-              <div className="text-bone-300/50 text-xs truncate">{u.email || '—'}</div>
+              <div className="text-bone-100 text-sm font-medium truncate">{u.full_name || 'â€”'}</div>
+              <div className="text-bone-300/50 text-xs truncate">{u.email || 'â€”'}</div>
             </div>
             <div className="flex justify-center">
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${roleColor(u.role)}`}>
@@ -351,12 +382,18 @@ function CreditsTab() {
               {u.listing_credits ?? 0}
             </div>
             <div className="text-center text-sm">
-              {u.role === 'particular' ? (u.free_listing_used ? '✅' : '⬜') : '—'}
+              {u.role === 'particular' ? (u.free_listing_used ? 'âœ…' : 'â¬œ') : 'â€”'}
             </div>
-            <div className="flex justify-center">
+            <div className="flex justify-center gap-1.5">
+              <button
+                onClick={() => openLedger(u)}
+                className="text-xs bg-pine-700 hover:bg-pine-600 text-bone-100 px-2.5 py-1.5 rounded-lg transition-colors"
+              >
+                Conta corrente
+              </button>
               <button
                 onClick={() => openAdjust(u)}
-                className="text-xs bg-pine-700 hover:bg-pine-600 text-bone-100 px-3 py-1.5 rounded-lg transition-colors"
+                className="text-xs bg-pine-700 hover:bg-pine-600 text-bone-100 px-2.5 py-1.5 rounded-lg transition-colors"
               >
                 Ajustar
               </button>
@@ -369,7 +406,7 @@ function CreditsTab() {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-pine-800 border border-pine-600 rounded-2xl w-full max-w-sm p-6 space-y-4">
             <h3 className="text-bone-100 font-display font-bold text-base">
-              Ajustar creditos — {adjusting.full_name}
+              Ajustar creditos â€” {adjusting.full_name}
             </h3>
             <div className="bg-pine-700/50 rounded-lg px-3 py-2 text-sm">
               <span className="text-bone-300/70">Creditos actuais: </span>
@@ -422,6 +459,56 @@ function CreditsTab() {
               className="w-full text-bone-300/60 hover:text-bone-100 text-sm py-1 transition-colors"
             >
               Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {ledgerUser && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-pine-800 border border-pine-600 rounded-2xl w-full max-w-lg p-6 space-y-4 max-h-[80vh] flex flex-col">
+            <div>
+              <h3 className="text-bone-100 font-display font-bold text-base">
+                Conta corrente â€” {ledgerUser.full_name}
+              </h3>
+              <p className="text-bone-300/50 text-xs">{ledgerUser.email}</p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto -mx-2 px-2">
+              {ledgerLoading && (
+                <div className="text-center text-bone-300/40 text-sm py-8">A carregar...</div>
+              )}
+              {!ledgerLoading && ledger.length === 0 && (
+                <div className="text-center text-bone-300/40 text-sm py-8">
+                  Sem movimentos registados ainda.
+                </div>
+              )}
+              {!ledgerLoading && ledger.map((mov) => (
+                <div key={mov.id} className="flex items-center justify-between gap-3 py-2.5 border-b border-pine-700/50 last:border-0">
+                  <div className="min-w-0">
+                    <div className="text-bone-100 text-sm font-medium">{typeLabel(mov.type)}</div>
+                    <div className="text-bone-300/50 text-xs truncate">
+                      {mov.description || 'â€”'}
+                    </div>
+                    <div className="text-bone-300/40 text-[11px]">
+                      {new Date(mov.created_at).toLocaleString('pt-PT')}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className={`font-display font-bold text-sm ${mov.amount >= 0 ? 'text-brass-400' : 'text-red-400'}`}>
+                      {mov.amount >= 0 ? '+' : ''}{mov.amount}
+                    </div>
+                    <div className="text-bone-300/40 text-[11px]">saldo: {mov.balance_after}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={closeLedger}
+              className="w-full text-bone-300/60 hover:text-bone-100 text-sm py-1 transition-colors"
+            >
+              Fechar
             </button>
           </div>
         </div>
@@ -495,7 +582,7 @@ function SettingsTab({ settings, onSaved }) {
         />
       </div>
       {freeUntilText && (
-        <p className="text-xs text-brass-400">Data definida — sera gratis para todos ate <strong>{freeUntilText}</strong>.</p>
+        <p className="text-xs text-brass-400">Data definida â€” sera gratis para todos ate <strong>{freeUntilText}</strong>.</p>
       )}
       <div className="flex items-center gap-3">
         <button
@@ -544,7 +631,7 @@ function ModerationTab({ listings, onDeleteListing, dbListings }) {
               )}
             </div>
             <div className="text-bone-300/60 text-xs">
-              {l.price} € {l.source === 'demo' && '· Artigo de exemplo'}
+              {l.price} â‚¬ {l.source === 'demo' && 'Â· Artigo de exemplo'}
             </div>
           </div>
 
@@ -568,7 +655,7 @@ function ModerationTab({ listings, onDeleteListing, dbListings }) {
             <button
               onClick={() => onDeleteListing(l)}
               className="text-red-400 hover:text-red-300 shrink-0"
-              title="Apagar anúncio"
+              title="Apagar anÃºncio"
             >
               <Trash2 size={18} />
             </button>
