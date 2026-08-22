@@ -101,6 +101,16 @@ serve(async (req) => {
 
     await adminClient.from('profiles').update({ listing_credits: newCredits }).eq('id', user.id)
 
+    // Regista este movimento na conta corrente do utilizador, para ficar
+    // com histórico de que este pagamento via PayPal deu origem a estes créditos.
+    await adminClient.from('credit_transactions').insert({
+      user_id: user.id,
+      type: 'compra_paypal',
+      amount: credits,
+      balance_after: newCredits,
+      description: `Compra via PayPal (order ${orderId})`
+    })
+
     return new Response(JSON.stringify({ success: true, creditsAdded: credits }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
