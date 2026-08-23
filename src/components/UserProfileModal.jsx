@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { X, User, Phone, MapPin, Mail, Save, Star, Ticket, ShieldCheck, Store, AlertCircle, CheckCircle, Trash2 } from 'lucide-react'
+import { X, User, Phone, MapPin, Mail, Save, Star, Ticket, ShieldCheck, Store, AlertCircle, CheckCircle, Trash2, Camera } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient.js'
+import CameraServiceModal from './CameraServiceModal.jsx'
 
 export default function UserProfileModal({ user, profile, isFreePeriod, onClose, onSaved }) {
+  const [cameraServiceOpen, setCameraServiceOpen] = useState(false)
   const [fullName, setFullName] = useState(profile?.full_name || '')
   const [phone, setPhone] = useState(profile?.phone || '')
   const [location, setLocation] = useState(profile?.location || '')
@@ -34,15 +36,15 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
   const creditsInfo = () => {
     if (isFreePeriod) {
       return {
-        label: 'Publicação grátis',
-        detail: 'A plataforma está em período de lançamento — podes publicar anúncios sem limite e sem custo.',
+        label: 'PublicaÃ§Ã£o grÃ¡tis',
+        detail: 'A plataforma estÃ¡ em perÃ­odo de lanÃ§amento â€” podes publicar anÃºncios sem limite e sem custo.',
         color: 'text-brass-400',
         bg: 'bg-brass-400/10 border-brass-400/20'
       }
     }
     if (profile?.role === 'admin') {
       return {
-        label: 'Publicação ilimitada',
+        label: 'PublicaÃ§Ã£o ilimitada',
         detail: 'Como administrador, podes publicar sempre sem custo.',
         color: 'text-blaze-400',
         bg: 'bg-blaze-500/10 border-blaze-500/20'
@@ -51,32 +53,32 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
     if (profile?.role === 'particular') {
       if (!freeUsed) {
         return {
-          label: '1 anúncio grátis disponível',
-          detail: 'Tens o teu primeiro anúncio por usar. A partir do 2.º, cada anúncio custa 1€.',
+          label: '1 anÃºncio grÃ¡tis disponÃ­vel',
+          detail: 'Tens o teu primeiro anÃºncio por usar. A partir do 2.Âº, cada anÃºncio custa 1â‚¬.',
           color: 'text-brass-400',
           bg: 'bg-brass-400/10 border-brass-400/20'
         }
       }
       return {
-        label: `${credits} crédito${credits !== 1 ? 's' : ''} disponível${credits !== 1 ? 'is' : ''}`,
+        label: `${credits} crÃ©dito${credits !== 1 ? 's' : ''} disponÃ­vel${credits !== 1 ? 'is' : ''}`,
         detail: credits > 0
-          ? `Tens ${credits} anúncio${credits !== 1 ? 's' : ''} pago${credits !== 1 ? 's' : ''} por publicar. Cada crédito = 1 anúncio.`
-          : 'Sem créditos. Ao tentares publicar, poderás comprar mais (1€ por anúncio).',
+          ? `Tens ${credits} anÃºncio${credits !== 1 ? 's' : ''} pago${credits !== 1 ? 's' : ''} por publicar. Cada crÃ©dito = 1 anÃºncio.`
+          : 'Sem crÃ©ditos. Ao tentares publicar, poderÃ¡s comprar mais (1â‚¬ por anÃºncio).',
         color: credits > 0 ? 'text-brass-400' : 'text-bone-300/50',
         bg: credits > 0 ? 'bg-brass-400/10 border-brass-400/20' : 'bg-pine-700/40 border-pine-600/40'
       }
     }
     if (profile?.role === 'loja') {
       return {
-        label: `${credits} crédito${credits !== 1 ? 's' : ''} disponível${credits !== 1 ? 'is' : ''}`,
+        label: `${credits} crÃ©dito${credits !== 1 ? 's' : ''} disponÃ­vel${credits !== 1 ? 'is' : ''}`,
         detail: credits > 0
-          ? `Tens ${credits} anúncio${credits !== 1 ? 's' : ''} disponível${credits !== 1 ? 'is' : ''}. Pacotes de 5 anúncios por 5€.`
-          : 'Sem créditos. Ao tentares publicar, poderás comprar pacotes (5 anúncios por 5€).',
+          ? `Tens ${credits} anÃºncio${credits !== 1 ? 's' : ''} disponÃ­vel${credits !== 1 ? 'is' : ''}. Pacotes de 5 anÃºncios por 5â‚¬.`
+          : 'Sem crÃ©ditos. Ao tentares publicar, poderÃ¡s comprar pacotes (5 anÃºncios por 5â‚¬).',
         color: credits > 0 ? 'text-brass-400' : 'text-bone-300/50',
         bg: credits > 0 ? 'bg-brass-400/10 border-brass-400/20' : 'bg-pine-700/40 border-pine-600/40'
       }
     }
-    return { label: '—', detail: '', color: 'text-bone-300', bg: '' }
+    return { label: 'â€”', detail: '', color: 'text-bone-300', bg: '' }
   }
 
   const creditStatus = creditsInfo()
@@ -97,7 +99,7 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
     setSaving(false)
 
     if (profileError) {
-      setError('Não foi possível guardar as alterações. Tenta novamente.')
+      setError('NÃ£o foi possÃ­vel guardar as alteraÃ§Ãµes. Tenta novamente.')
       return
     }
 
@@ -111,11 +113,11 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
     const trimmed = newEmail.trim().toLowerCase()
 
     if (!trimmed || !trimmed.includes('@')) {
-      setEmailError('Introduz um email válido.')
+      setEmailError('Introduz um email vÃ¡lido.')
       return
     }
     if (trimmed === user?.email) {
-      setEmailError('O novo email é igual ao atual.')
+      setEmailError('O novo email Ã© igual ao atual.')
       return
     }
 
@@ -124,7 +126,7 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
     setEmailSaving(false)
 
     if (emailErr) {
-      setEmailError('Não foi possível enviar o link. Verifica o email e tenta novamente.')
+      setEmailError('NÃ£o foi possÃ­vel enviar o link. Verifica o email e tenta novamente.')
       return
     }
 
@@ -133,9 +135,9 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
   }
 
   function handleDeleteRequest() {
-    const subject = encodeURIComponent('Pedido de cancelamento de conta — WildMarket')
+    const subject = encodeURIComponent('Pedido de cancelamento de conta â€” WildMarket')
     const body = encodeURIComponent(
-      `Olá,\n\nVenho por este meio solicitar o cancelamento da minha conta no WildMarket.\n\nEmail da conta: ${user?.email}\n\nObrigado.`
+      `OlÃ¡,\n\nVenho por este meio solicitar o cancelamento da minha conta no WildMarket.\n\nEmail da conta: ${user?.email}\n\nObrigado.`
     )
     window.open(`mailto:cacamarket@proton.me?subject=${subject}&body=${body}`, '_blank')
   }
@@ -144,7 +146,7 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-pine-900 border border-pine-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
 
-        {/* Cabeçalho */}
+        {/* CabeÃ§alho */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-pine-700">
           <h2 className="text-bone-100 font-display font-bold text-base">O meu perfil</h2>
           <button onClick={onClose} className="text-bone-300/60 hover:text-bone-100 transition-colors">
@@ -160,7 +162,7 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
               <User size={26} className="text-blaze-400" />
             </div>
             <div>
-              <div className="text-bone-100 font-semibold text-sm">{profile?.full_name || '—'}</div>
+              <div className="text-bone-100 font-semibold text-sm">{profile?.full_name || 'â€”'}</div>
               <div className="flex items-center gap-1.5 mt-1">
                 <span className="flex items-center gap-1 text-xs text-bone-300/60 bg-pine-800 border border-pine-600 rounded-full px-2 py-0.5">
                   {roleIcon}
@@ -176,13 +178,13 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
               {profile?.rating > 0 && (
                 <div className="flex items-center gap-1 mt-1 text-xs text-bone-300/60">
                   <Star size={11} className="text-brass-400 fill-brass-400" />
-                  {profile.rating.toFixed(1)} ({profile.reviews_count} avaliações)
+                  {profile.rating.toFixed(1)} ({profile.reviews_count} avaliaÃ§Ãµes)
                 </div>
               )}
             </div>
           </div>
 
-          {/* Bloco de créditos */}
+          {/* Bloco de crÃ©ditos */}
           <div className={`rounded-xl border px-4 py-3 ${creditStatus.bg}`}>
             <div className="flex items-center gap-2 mb-1">
               <Ticket size={15} className={creditStatus.color} />
@@ -195,14 +197,23 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
             </p>
           </div>
 
-          {/* Email atual + botão para alterar */}
+          {/* ServiÃ§o de cÃ¢mara para Telegram */}
+          <button
+            onClick={() => setCameraServiceOpen(true)}
+            className="w-full flex items-center gap-2 bg-pine-800/50 border border-pine-700 hover:border-brass-400/50 rounded-lg px-3 py-2.5 text-sm text-bone-100 transition-colors"
+          >
+            <Camera size={15} className="text-brass-400" />
+            CÃ¢mara para Telegram
+          </button>
+
+          {/* Email atual + botÃ£o para alterar */}
           <div>
             <label className="text-xs text-bone-300/60 block mb-1.5 flex items-center gap-1.5">
               <Mail size={12} />
               Email
             </label>
             <div className="bg-pine-800/50 border border-pine-700 rounded-lg px-3 py-2.5 text-sm text-bone-300/70 select-all">
-              {user?.email || '—'}
+              {user?.email || 'â€”'}
             </div>
 
             {!emailSection && !emailSent && (
@@ -235,7 +246,7 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
                     disabled={emailSaving || !newEmail.trim()}
                     className="flex-1 bg-blaze-500 hover:bg-blaze-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-pine-950 font-bold text-xs py-2 rounded-lg"
                   >
-                    {emailSaving ? 'A enviar...' : 'Enviar link de confirmação'}
+                    {emailSaving ? 'A enviar...' : 'Enviar link de confirmaÃ§Ã£o'}
                   </button>
                   <button
                     onClick={() => { setEmailSection(false); setNewEmail(''); setEmailError(null) }}
@@ -245,7 +256,7 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
                   </button>
                 </div>
                 <p className="text-xs text-bone-300/40 leading-relaxed">
-                  Será enviado um link de confirmação para o novo email. O email só muda depois de clicares no link.
+                  SerÃ¡ enviado um link de confirmaÃ§Ã£o para o novo email. O email sÃ³ muda depois de clicares no link.
                 </p>
               </div>
             )}
@@ -253,7 +264,7 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
             {emailSent && (
               <div className="mt-2 flex items-start gap-2 text-xs text-brass-400 bg-brass-400/10 border border-brass-400/20 rounded-lg px-3 py-2">
                 <CheckCircle size={13} className="mt-0.5 shrink-0" />
-                <span>Link enviado! Verifica o teu novo email e clica no link para confirmar a alteração.</span>
+                <span>Link enviado! Verifica o teu novo email e clica no link para confirmar a alteraÃ§Ã£o.</span>
               </div>
             )}
           </div>
@@ -288,11 +299,11 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
             />
           </div>
 
-          {/* Localização */}
+          {/* LocalizaÃ§Ã£o */}
           <div>
             <label className="text-xs text-bone-300/60 block mb-1.5 flex items-center gap-1.5">
               <MapPin size={12} />
-              Localização
+              LocalizaÃ§Ã£o
             </label>
             <input
               type="text"
@@ -317,14 +328,14 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
             </div>
           )}
 
-          {/* Botão guardar */}
+          {/* BotÃ£o guardar */}
           <button
             onClick={handleSave}
             disabled={saving || !fullName.trim()}
             className="w-full flex items-center justify-center gap-2 bg-blaze-500 hover:bg-blaze-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-pine-950 font-bold text-sm py-2.5 rounded-xl"
           >
             <Save size={16} />
-            {saving ? 'A guardar...' : 'Guardar alterações'}
+            {saving ? 'A guardar...' : 'Guardar alteraÃ§Ãµes'}
           </button>
 
           {/* Info membro desde */}
@@ -354,6 +365,14 @@ export default function UserProfileModal({ user, profile, isFreePeriod, onClose,
 
         </div>
       </div>
+
+      {cameraServiceOpen && (
+        <CameraServiceModal
+          profile={profile}
+          onClose={() => setCameraServiceOpen(false)}
+          onCreditsChanged={onSaved}
+        />
+      )}
     </div>
   )
 }
