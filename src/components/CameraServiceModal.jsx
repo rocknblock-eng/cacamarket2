@@ -9,16 +9,41 @@ import { supabase } from '../lib/supabaseClient.js'
 // "SMTP", dividido em 12 campos de 64 bytes cada. Cada byte e cifrado com:
 //   encoded = 255 - swap_nibbles(byte)
 // (cifra simetrica: aplicar a mesma funcao outra vez devolve o original)
+//
+// Em vez de embutir o ficheiro inteiro como um bloco gigante de texto
+// (fragil de copiar/colar), reconstruimos os 1808 bytes a partir de:
+//  - um preenchimento por defeito (0xFF, que e o valor de "campo vazio")
+//  - alguns pedacos pequenos com dados reais (nome da camara, paises/
+//    operadoras de MMS que a camara ja trazia por defeito)
+// Isto e muito mais curto e muito mais dificil de corromper ao copiar.
 // ---------------------------------------------------------------------------
 
-const TEMPLATE_B64 =
-  'AAAAAABDQU0wMDAAAAAAAAAAAQAAAAAAAAAAAAAAAAAaCBMVHzgBAAgBAAAAFzs7AAAAABc7OwAAAAAXOzsAAQAAAAAAAAAAAAABADAwMDABAWNBcmdlbnRpbmEAAAAAAAAATW92aXN0YXIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKSnIHYn42MgdqBlpmQkZHckJKR3p2P///////////////////////////////////////////////////////ykpyP////////////////////////////////////////////////////////////////////////////////8pKcj/////////////////////////////////////////////////////////////////////////////////KSnIHSkJmGnIuOnYHckJKR3p2P///////////////////////////////////////////////////////////9z8/B2cfB3M3B3czGz///////////////////////////////////////////////////////////////////98/Hz8//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8BAWNQb3J0dWdhbAAAAAAAAAAATm9zAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaRm4qdgZqbj/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yekpHYhpObkp6dhJqbgd6fj4/////////////////////////////////////////////////////////////9ys//////////////////////////////////////////////////////////////////////////////////+IaTm5KenYSam4////////////////////////////////////////////////////////////////////////y+kpuqnIuNz83JzNiint/////////////////////////////////////////////////////////////////8npKanY6fuIaTm5KenYSam4Hen4+P/////////////////////////////////////////////////////////puSlpGfuIaTm5KenYSam4Hen4+P////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8='
+const FILE_LENGTH = 1808
 
-function base64ToBytes(b64) {
-  const bin = atob(b64)
-  const bytes = new Uint8Array(bin.length)
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
-  return bytes
+const KNOWN_CHUNKS = [
+  [0, '000000000043414d3030300000000000000001000000000000000000000000001a0813151f3801000801000000173b3b00000000173b3b00000000173b3b000100000000000000000000010030303030010163417267656e74696e61000000000000004d6f766973746172000000000000000000000000000000000000000000000000000000000000000000000000002929c81d89f8d8c81da819699909191dc909291de9d8'],
+  [208, '2929c8'],
+  [272, '2929c8'],
+  [336, '2929c81d29099869c8b8e9d81dc909291de9d8'],
+  [400, 'dcfcfc1d9c7c1dccdc1ddccc6c'],
+  [464, '7cfc7cfc'],
+  [1040, '010163506f72747567616c00000000000000004e6f730000000000000000000000000000000000000000000000000000000000000000000000000000000000006919b8a9d819a9b8'],
+]
+
+function hexToBytes(hex) {
+  const out = new Uint8Array(hex.length / 2)
+  for (let i = 0; i < out.length; i++) {
+    out[i] = parseInt(hex.substr(i * 2, 2), 16)
+  }
+  return out
+}
+
+function buildTemplate() {
+  const data = new Uint8Array(FILE_LENGTH).fill(0xff)
+  for (const [offset, hex] of KNOWN_CHUNKS) {
+    data.set(hexToBytes(hex), offset)
+  }
+  return data
 }
 
 function encryptByte(b) {
@@ -38,10 +63,10 @@ function encodeField(text, length = 64) {
 
 // Gera o ficheiro Parameter.dat personalizado para este dispositivo.
 function buildParameterDat({ smtpServer, smtpPort, deviceCode, recipient }) {
-  const data = base64ToBytes(TEMPLATE_B64)
-  if (data.length !== 1808) {
+  const data = buildTemplate()
+  if (data.length !== FILE_LENGTH) {
     throw new Error(
-      `Modelo do ficheiro corrompido (tem ${data.length} bytes, devia ter 1808). ` +
+      `Modelo do ficheiro corrompido (tem ${data.length} bytes, devia ter ${FILE_LENGTH}). ` +
       `Contacta o suporte antes de usares este ficheiro na camara.`
     )
   }
