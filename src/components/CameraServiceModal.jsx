@@ -3,12 +3,12 @@ import { X, Camera, Send, Download, CheckCircle, AlertCircle } from 'lucide-reac
 import { supabase } from '../lib/supabaseClient.js'
 
 // ---------------------------------------------------------------------------
-// Gerador do Parameter.dat, feito 100% no browser (sem precisar do servidor).
+// Gerador do Parameter.dat, feito no browser (sem precisar do servidor).
 //
-// O ficheiro da câmara tem 1808 bytes. Os últimos 768 bytes são o bloco
-// "SMTP", dividido em 12 campos de 64 bytes cada. Cada byte é cifrado com:
+// O ficheiro da camara tem 1808 bytes. Os ultimos 768 bytes sao o bloco
+// "SMTP", dividido em 12 campos de 64 bytes cada. Cada byte e cifrado com:
 //   encoded = 255 - swap_nibbles(byte)
-// (uma cifra simétrica: aplicar a mesma função outra vez devolve o original)
+// (cifra simetrica: aplicar a mesma funcao outra vez devolve o original)
 // ---------------------------------------------------------------------------
 
 const TEMPLATE_B64 =
@@ -90,7 +90,7 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
     setError(null)
     const cleanCode = code.trim()
     if (!/^\d{6}$/.test(cleanCode)) {
-      setError('O código deve ter 6 números (o que o bot te enviou no Telegram).')
+      setError('O c\u00f3digo deve ter 6 n\u00fameros (o que o bot te enviou no Telegram).')
       return
     }
     setLoading(true)
@@ -101,7 +101,7 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
     setLoading(false)
 
     if (rpcError) {
-      setError(rpcError.message || 'Não foi possível ativar a câmara.')
+      setError(rpcError.message || 'N\u00e3o foi poss\u00edvel ativar a c\u00e2mara.')
       return
     }
     const row = Array.isArray(data) ? data[0] : data
@@ -115,7 +115,7 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
         <div className="flex items-center justify-between">
           <h3 className="text-bone-100 font-display font-bold text-lg flex items-center gap-2">
             <Camera size={20} className="text-brass-400" />
-            Câmara para Telegram
+            {'C\u00e2mara para Telegram'}
           </h3>
           <button onClick={onClose} className="text-bone-300/50 hover:text-bone-100">
             <X size={20} />
@@ -125,9 +125,11 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
         {!result && (
           <>
             <p className="text-bone-300/70 text-sm leading-relaxed">
-              Recebe as fotos da tua câmara de fototrapagem diretamente no Telegram.
-              Custa <strong className="text-brass-400">10 créditos</strong> por 90 dias.
-              Tens atualmente <strong className="text-bone-100">{credits}</strong> crédito(s).
+              {'Recebe as fotos da tua c\u00e2mara de fototrapagem diretamente no Telegram.'}
+              {' '}
+              {'Custa '}<strong className="text-brass-400">{'10 cr\u00e9ditos'}</strong>{' por 90 dias.'}
+              {' '}
+              {'Tens atualmente '}<strong className="text-bone-100">{credits}</strong>{' cr\u00e9dito(s).'}
             </p>
 
             <div className="bg-pine-900/50 rounded-xl p-4 space-y-3 text-sm text-bone-300/80">
@@ -148,17 +150,17 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
               </div>
               <div className="flex gap-2">
                 <span className="font-display font-bold text-brass-400">2.</span>
-                <span>Cola aqui o código de 6 números que o bot te enviar</span>
+                <span>{'Cola aqui o c\u00f3digo de 6 n\u00fameros que o bot te enviar'}</span>
               </div>
               <div className="flex gap-2">
                 <span className="font-display font-bold text-brass-400">3.</span>
-                <span>Descarrega o ficheiro e copia para o cartão SD da câmara</span>
+                <span>{'Descarrega o ficheiro e copia para o cart\u00e3o SD da c\u00e2mara'}</span>
               </div>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-bone-300/60 block mb-1">Código do Telegram</label>
+                <label className="text-xs text-bone-300/60 block mb-1">{'C\u00f3digo do Telegram'}</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -170,12 +172,12 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
                 />
               </div>
               <div>
-                <label className="text-xs text-bone-300/60 block mb-1">Nome da câmara (opcional)</label>
+                <label className="text-xs text-bone-300/60 block mb-1">{'Nome da c\u00e2mara (opcional)'}</label>
                 <input
                   type="text"
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
-                  placeholder="Ex: Câmara do monte"
+                  placeholder={'Ex: C\u00e2mara do monte'}
                   className="w-full bg-pine-900 border border-pine-600 rounded-lg px-3 py-2 text-bone-100 text-sm"
                 />
               </div>
@@ -193,7 +195,11 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
               disabled={loading || credits < 10}
               className="w-full bg-brass-500 hover:bg-brass-400 disabled:opacity-40 disabled:cursor-not-allowed text-pine-900 font-display font-bold py-2.5 rounded-lg transition-colors"
             >
-              {loading ? 'A ativar...' : credits < 10 ? 'Créditos insuficientes' : 'Ativar câmara (10 créditos)'}
+              {loading
+                ? 'A ativar...'
+                : credits < 10
+                ? '\u00c9 preciso ter 10 cr\u00e9ditos'
+                : 'Ativar c\u00e2mara (10 cr\u00e9ditos)'}
             </button>
           </>
         )}
@@ -203,12 +209,13 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
             <div className="flex items-start gap-2 text-brass-400 bg-brass-400/10 rounded-lg p-3 text-sm">
               <CheckCircle size={18} className="shrink-0 mt-0.5" />
               <span>
-                Câmara ativada! Válida até <strong>{result.active_until}</strong>.
+                {'C\u00e2mara ativada! V\u00e1lida at\u00e9 '}<strong>{result.active_until}</strong>.
               </span>
             </div>
             <p className="text-bone-300/70 text-sm">
-              Descarrega o ficheiro abaixo e copia para o cartão SD da tua câmara
-              (substitui o ficheiro <code className="bg-pine-700 px-1 rounded">Parameter.dat</code> que lá está).
+              {'Descarrega o ficheiro abaixo e copia para o cart\u00e3o SD da tua c\u00e2mara (substitui o ficheiro '}
+              <code className="bg-pine-700 px-1 rounded">Parameter.dat</code>
+              {' que l\u00e1 est\u00e1).'}
             </p>
             <button
               onClick={() => downloadParameterDat(result.device_code)}
