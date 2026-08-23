@@ -136,16 +136,15 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
               <div className="flex gap-2">
                 <span className="font-display font-bold text-brass-400">1.</span>
                 <span>
-                  No Telegram, abre a conversa com{' '}
-                  
-                    href={`https://t.me/${BOT_USERNAME}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-brass-400 underline inline-flex items-center gap-1"
+                  {'No Telegram, abre a conversa com '}
+                  <span
+                    onClick={() => window.open(`https://t.me/${BOT_USERNAME}`, '_blank', 'noreferrer')}
+                    className="text-brass-400 underline inline-flex items-center gap-1 cursor-pointer"
                   >
                     @{BOT_USERNAME} <Send size={12} />
-                  </a>{' '}
-                  e envia <code className="bg-pine-700 px-1 rounded">/start</code>
+                  </span>
+                  {' e envia '}
+                  <code className="bg-pine-700 px-1 rounded">/start</code>
                 </span>
               </div>
               <div className="flex gap-2">
