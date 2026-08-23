@@ -36,16 +36,23 @@ function encodeField(text, length = 64) {
   return out
 }
 
+// Gera o ficheiro Parameter.dat personalizado para este dispositivo.
 function buildParameterDat({ smtpServer, smtpPort, deviceCode, recipient }) {
   const data = base64ToBytes(TEMPLATE_B64)
+  if (data.length !== 1808) {
+    throw new Error(
+      `Modelo do ficheiro corrompido (tem ${data.length} bytes, devia ter 1808). ` +
+      `Contacta o suporte antes de usares este ficheiro na camara.`
+    )
+  }
   const blockStart = data.length - 768
 
   const fields = {
-    4: smtpServer,
-    5: smtpPort,
-    6: deviceCode,
-    7: 'wildmarket',
-    8: recipient,
+    4: smtpServer,      // SmtpServer
+    5: smtpPort,         // SmtpPort
+    6: deviceCode,        // SendEmail (identificador desta camara)
+    7: 'wildmarket',       // SendEmailPassword (nao validado pelo servidor)
+    8: recipient,           // SmtpEmail1 (nao usado para routing, so preenchimento)
   }
 
   for (const [idx, value] of Object.entries(fields)) {
@@ -57,12 +64,18 @@ function buildParameterDat({ smtpServer, smtpPort, deviceCode, recipient }) {
 }
 
 function downloadParameterDat(deviceCode) {
-  const bytes = buildParameterDat({
-    smtpServer: 'cam.wildmarket.app',
-    smtpPort: '25',
-    deviceCode,
-    recipient: `${deviceCode}@wildmarket.app`,
-  })
+  let bytes
+  try {
+    bytes = buildParameterDat({
+      smtpServer: 'cam.wildmarket.app',
+      smtpPort: '25',
+      deviceCode,
+      recipient: `${deviceCode}@wildmarket.app`,
+    })
+  } catch (err) {
+    alert(err.message)
+    return
+  }
   const blob = new Blob([bytes], { type: 'application/octet-stream' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -81,7 +94,7 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
   const [label, setLabel] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [result, setResult] = useState(null)
+  const [result, setResult] = useState(null) // { device_code, active_until }
 
   const credits = profile?.listing_credits ?? 0
 
