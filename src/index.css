@@ -52,3 +52,12 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Esconde scrollbar mantendo scroll funcional (para barras de abas em movel) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
