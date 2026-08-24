@@ -176,7 +176,8 @@ function UsersTab() {
   )
 
   return (
-    <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
+    <div className="overflow-x-auto -mx-1">
+    <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden min-w-[500px]">
       <div className="grid grid-cols-[1fr_70px_100px_110px_90px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
         <span>Utilizador</span>
         <span className="text-center">Tipo</span>
@@ -252,6 +253,7 @@ function UsersTab() {
           </div>
         </div>
       ))}
+    </div>
     </div>
   )
 }
@@ -366,7 +368,8 @@ function CreditsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
+      <div className="overflow-x-auto -mx-1">
+      <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden min-w-[480px]">
         <div className="grid grid-cols-[1fr_70px_70px_70px_170px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
           <span>Utilizador</span>
           <span className="text-center">Tipo</span>
@@ -414,6 +417,7 @@ function CreditsTab() {
             </div>
           </div>
         ))}
+      </div>
       </div>
 
       {adjusting && (
@@ -611,7 +615,8 @@ function CamerasTab() {
       ) : rows.length === 0 ? (
         <div className="text-center text-bone-300/40 text-sm py-8">{'Nenhuma c\u00e2mara ativada ainda.'}</div>
       ) : (
-        <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto -mx-1">
+        <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden min-w-[600px]">
           <div className="grid grid-cols-[1.2fr_1fr_65px_65px_1fr_85px_75px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
             <div>{'Cliente / C\u00e2mara'}</div>
             <div>{'C\u00f3digo'}</div>
@@ -658,6 +663,7 @@ function CamerasTab() {
               </div>
             </div>
           ))}
+        </div>
         </div>
       )}
     </div>
