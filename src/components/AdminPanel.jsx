@@ -368,7 +368,8 @@ function CreditsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto -mx-1">
+      {/* Desktop: tabela normal. Mobile: cartoes por utilizador */}
+      <div className="hidden sm:block overflow-x-auto -mx-1">
       <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden min-w-[480px]">
         <div className="grid grid-cols-[1fr_70px_70px_70px_170px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
           <span>Utilizador</span>
@@ -377,13 +378,9 @@ function CreditsTab() {
           <span className="text-center">1. Gratis</span>
           <span className="text-center">Acao</span>
         </div>
-
         {users.length === 0 && (
-          <div className="px-4 py-8 text-center text-bone-300/40 text-sm">
-            Nenhum utilizador registado.
-          </div>
+          <div className="px-4 py-8 text-center text-bone-300/40 text-sm">Nenhum utilizador registado.</div>
         )}
-
         {users.map((u) => (
           <div key={u.id} className="grid grid-cols-[1fr_70px_70px_70px_170px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0">
             <div className="min-w-0">
@@ -391,33 +388,42 @@ function CreditsTab() {
               <div className="text-bone-300/50 text-xs truncate">{u.email || '\u2014'}</div>
             </div>
             <div className="flex justify-center">
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${roleColor(u.role)}`}>
-                {roleLabel(u.role)}
-              </span>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${roleColor(u.role)}`}>{roleLabel(u.role)}</span>
             </div>
-            <div className="text-center font-display font-bold text-blaze-400 text-lg">
-              {u.listing_credits ?? 0}
-            </div>
-            <div className="text-center text-sm">
-              {u.role === 'particular' ? (u.free_listing_used ? '\u2705' : '\u2b1c') : '\u2014'}
-            </div>
+            <div className="text-center font-display font-bold text-blaze-400 text-lg">{u.listing_credits ?? 0}</div>
+            <div className="text-center text-sm">{u.role === 'particular' ? (u.free_listing_used ? '\u2705' : '\u2b1c') : '\u2014'}</div>
             <div className="flex justify-center gap-1.5">
-              <button
-                onClick={() => openLedger(u)}
-                className="text-xs bg-pine-700 hover:bg-pine-600 text-bone-100 px-2.5 py-1.5 rounded-lg transition-colors"
-              >
-                Conta corrente
-              </button>
-              <button
-                onClick={() => openAdjust(u)}
-                className="text-xs bg-pine-700 hover:bg-pine-600 text-bone-100 px-2.5 py-1.5 rounded-lg transition-colors"
-              >
-                Ajustar
-              </button>
+              <button onClick={() => openLedger(u)} className="text-xs bg-pine-700 hover:bg-pine-600 text-bone-100 px-2.5 py-1.5 rounded-lg transition-colors">Conta corrente</button>
+              <button onClick={() => openAdjust(u)} className="text-xs bg-pine-700 hover:bg-pine-600 text-bone-100 px-2.5 py-1.5 rounded-lg transition-colors">Ajustar</button>
             </div>
           </div>
         ))}
       </div>
+      </div>
+
+      {/* Mobile: cartao por utilizador */}
+      <div className="sm:hidden space-y-2">
+        {users.length === 0 && (
+          <div className="text-center text-bone-300/40 text-sm py-8">Nenhum utilizador registado.</div>
+        )}
+        {users.map((u) => (
+          <div key={u.id} className="bg-pine-800 border border-pine-700 rounded-xl px-4 py-3 space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-bone-100 text-sm font-semibold">{u.full_name || '\u2014'}</div>
+                <div className="text-bone-300/50 text-xs break-all">{u.email || '\u2014'}</div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${roleColor(u.role)}`}>{roleLabel(u.role)}</span>
+                <span className="font-display font-bold text-blaze-400 text-lg">{u.listing_credits ?? 0}</span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => openLedger(u)} className="flex-1 text-xs bg-pine-700 hover:bg-pine-600 text-bone-100 px-2.5 py-2 rounded-lg transition-colors text-center">Conta corrente</button>
+              <button onClick={() => openAdjust(u)} className="flex-1 text-xs bg-pine-700 hover:bg-pine-600 text-bone-100 px-2.5 py-2 rounded-lg transition-colors text-center">Ajustar</button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {adjusting && (
