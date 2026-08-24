@@ -67,10 +67,10 @@ export default function AdminPanel({
 
 function StatsTab({ listings, sellers }) {
   const stats = [
-    { label: 'anÃƒÂºncios ativos', value: listings.length },
+    { label: 'an\u00fancios ativos', value: listings.length },
     { label: 'Vendedores registados', value: Object.keys(sellers).length },
     { label: 'Vendedores verificados', value: Object.values(sellers).filter((s) => s.verified).length },
-    { label: 'Valor total em anÃƒÂºncios', value: `${listings.reduce((a, l) => a + Number(l.price), 0)} EUR` }
+    { label: 'Valor total em an\u00fancios', value: `${listings.reduce((a, l) => a + Number(l.price), 0)} EUR` }
   ]
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -141,15 +141,15 @@ function UsersTab() {
 
     await supabase.from('listings').delete().eq('seller_id', user.id)
 
-    // Esta Ã© a eliminaÃ§Ã£o que conta a sÃ©rio (remove a conta do sistema de
-    // autenticaÃ§Ã£o; o perfil, anÃºncios e movimentos de crÃ©ditos sÃ£o
-    // arrastados automaticamente). Se falhar, avisamos e NÃƒO fingimos que
+    // Esta e a eliminacao que conta a serio (remove a conta do sistema de
+    // autenticacao; o perfil, anuncios e movimentos de creditos sao
+    // arrastados automaticamente). Se falhar, avisamos e NAO fingimos que
     // a conta foi eliminada.
     const { data: deleteResult, error: deleteError } = await supabase.functions.invoke('delete-user', { body: { userId: user.id } })
 
     if (deleteError || deleteResult?.error) {
       setActing(null)
-      alert(`NÃ£o foi possÃ­vel eliminar a conta: ${deleteResult?.error || deleteError?.message || 'erro desconhecido'}`)
+      alert(`N\u00e3o foi poss\u00edvel eliminar a conta: ${deleteResult?.error || deleteError?.message || 'erro desconhecido'}`)
       return
     }
 
@@ -189,11 +189,11 @@ function UsersTab() {
         <div key={u.id} className={`grid grid-cols-[1fr_70px_100px_110px_90px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0 ${u.blocked ? 'opacity-50' : ''}`}>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="text-bone-100 text-sm font-medium truncate">{u.full_name || 'Ã¢â‚¬â€'}</span>
+              <span className="text-bone-100 text-sm font-medium truncate">{u.full_name || '\u2014'}</span>
               {u.blocked && <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full shrink-0">Banido</span>}
               {u.suspended && !u.blocked && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded-full shrink-0">Suspenso</span>}
             </div>
-            <div className="text-bone-300/50 text-xs truncate">{u.email || 'Ã¢â‚¬â€'}</div>
+            <div className="text-bone-300/50 text-xs truncate">{u.email || '\u2014'}</div>
           </div>
 
           <div className="flex justify-center">
@@ -295,7 +295,7 @@ function CreditsTab() {
 
     const delta = type === 'add' ? n : -n
 
-    // Usa a funÃƒÂ§ÃƒÂ£o admin_adjust_credits (em vez de um update direto) para que
+    // Usa a funcao admin_adjust_credits (em vez de um update direto) para que
     // este ajuste fique automaticamente registado na conta corrente do utilizador.
     const { data: newCredits, error } = await supabase
       .rpc('admin_adjust_credits', {
@@ -380,8 +380,8 @@ function CreditsTab() {
         {users.map((u) => (
           <div key={u.id} className="grid grid-cols-[1fr_70px_70px_70px_170px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0">
             <div className="min-w-0">
-              <div className="text-bone-100 text-sm font-medium truncate">{u.full_name || 'Ã¢â‚¬â€'}</div>
-              <div className="text-bone-300/50 text-xs truncate">{u.email || 'Ã¢â‚¬â€'}</div>
+              <div className="text-bone-100 text-sm font-medium truncate">{u.full_name || '\u2014'}</div>
+              <div className="text-bone-300/50 text-xs truncate">{u.email || '\u2014'}</div>
             </div>
             <div className="flex justify-center">
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${roleColor(u.role)}`}>
@@ -392,7 +392,7 @@ function CreditsTab() {
               {u.listing_credits ?? 0}
             </div>
             <div className="text-center text-sm">
-              {u.role === 'particular' ? (u.free_listing_used ? 'Ã¢Å“â€¦' : 'Ã¢Â¬Å“') : 'Ã¢â‚¬â€'}
+              {u.role === 'particular' ? (u.free_listing_used ? '\u2705' : '\u2b1c') : '\u2014'}
             </div>
             <div className="flex justify-center gap-1.5">
               <button
@@ -416,7 +416,7 @@ function CreditsTab() {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-pine-800 border border-pine-600 rounded-2xl w-full max-w-sm p-6 space-y-4">
             <h3 className="text-bone-100 font-display font-bold text-base">
-              Ajustar creditos Ã¢â‚¬â€ {adjusting.full_name}
+              {'Ajustar creditos \u2014 '}{adjusting.full_name}
             </h3>
             <div className="bg-pine-700/50 rounded-lg px-3 py-2 text-sm">
               <span className="text-bone-300/70">Creditos actuais: </span>
@@ -479,7 +479,7 @@ function CreditsTab() {
           <div className="bg-pine-800 border border-pine-600 rounded-2xl w-full max-w-lg p-6 space-y-4 max-h-[80vh] flex flex-col">
             <div>
               <h3 className="text-bone-100 font-display font-bold text-base">
-                Conta corrente Ã¢â‚¬â€ {ledgerUser.full_name}
+                {'Conta corrente \u2014 '}{ledgerUser.full_name}
               </h3>
               <p className="text-bone-300/50 text-xs">{ledgerUser.email}</p>
             </div>
@@ -498,7 +498,7 @@ function CreditsTab() {
                   <div className="min-w-0">
                     <div className="text-bone-100 text-sm font-medium">{typeLabel(mov.type)}</div>
                     <div className="text-bone-300/50 text-xs truncate">
-                      {mov.description || 'Ã¢â‚¬â€'}
+                      {mov.description || '\u2014'}
                     </div>
                     <div className="text-bone-300/40 text-[11px]">
                       {new Date(mov.created_at).toLocaleString('pt-PT')}
@@ -592,7 +592,7 @@ function SettingsTab({ settings, onSaved }) {
         />
       </div>
       {freeUntilText && (
-        <p className="text-xs text-brass-400">Data definida Ã¢â‚¬â€ sera gratis para todos ate <strong>{freeUntilText}</strong>.</p>
+        <p className="text-xs text-brass-400">{'Data definida \u2014 sera gratis para todos ate '}<strong>{freeUntilText}</strong>.</p>
       )}
       <div className="flex items-center gap-3">
         <button
@@ -641,7 +641,7 @@ function ModerationTab({ listings, onDeleteListing, dbListings }) {
               )}
             </div>
             <div className="text-bone-300/60 text-xs">
-              {l.price} Ã¢â€šÂ¬ {l.source === 'demo' && 'Ã‚Â· Artigo de exemplo'}
+              {l.price} {'\u20ac'} {l.source === 'demo' && '\u00b7 Artigo de exemplo'}
             </div>
           </div>
 
@@ -665,7 +665,7 @@ function ModerationTab({ listings, onDeleteListing, dbListings }) {
             <button
               onClick={() => onDeleteListing(l)}
               className="text-red-400 hover:text-red-300 shrink-0"
-              title="Apagar anÃƒÂºncio"
+              title="Apagar an\u00fancio"
             >
               <Trash2 size={18} />
             </button>

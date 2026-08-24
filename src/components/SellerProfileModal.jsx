@@ -1,13 +1,12 @@
-import { X, ShieldCheck, MapPin, Calendar } from 'lucide-react'
-export default function SellerProfileModal({ seller, onClose }) {
-  if (!seller) return null
-  return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
+import { X, ShieldCheck, MapPin, Calendar } from 'lucide-react';
+export default function SellerProfileModal({
+  seller,
+  onClose
+}) {
+  if (!seller) return null;
+  return <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="bg-pine-800 border border-pine-600 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-5 relative">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-bone-300 hover:text-blaze-400"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 text-bone-300 hover:text-blaze-400">
           <X size={20} />
         </button>
         <div className="flex items-center gap-3 mb-4">
@@ -32,12 +31,7 @@ export default function SellerProfileModal({ seller, onClose }) {
             <div className="text-bone-100 text-xs">Membro desde {seller.memberSince}</div>
           </div>
         </div>
-        {!seller.verified && (
-          <p className="text-[11px] text-bone-300/60 mt-4">
-            Este vendedor ainda não completou a verificacao de identidade.
-          </p>
-        )}
+        {!seller.verified && <p className="text-[11px] text-bone-300/60 mt-4">{'Este vendedor ainda n\u00e3o completou a verificacao de identidade.'}</p>}
       </div>
-    </div>
-  )
+    </div>;
 }
