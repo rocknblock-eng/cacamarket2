@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings, Coins, Plus, Minus, Ban, ShieldOff, ShieldCheck, Star } from 'lucide-react'
+import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings, Coins, Plus, Minus, Ban, ShieldOff, ShieldCheck, Star, Camera, AlertTriangle } from 'lucide-react'
 import { LISTINGS, SELLERS } from '../data/listings.js'
 import { supabase } from '../lib/supabaseClient.js'
 
@@ -7,6 +7,7 @@ const TABS = [
   { id: 'stats', label: 'Estatisticas', icon: BarChart3 },
   { id: 'users', label: 'Utilizadores', icon: Users },
   { id: 'credits', label: 'Creditos', icon: Coins },
+  { id: 'cameras', label: 'Cameras', icon: Camera },
   { id: 'moderation', label: 'Moderacao', icon: ListChecks },
   { id: 'settings', label: 'Definicoes', icon: Settings }
 ]
@@ -55,6 +56,7 @@ export default function AdminPanel({
       {tab === 'stats' && <StatsTab listings={allListings} sellers={allSellers} />}
       {tab === 'users' && <UsersTab sellers={allSellers} />}
       {tab === 'credits' && <CreditsTab />}
+      {tab === 'cameras' && <CamerasTab />}
       {tab === 'moderation' && (
         <ModerationTab listings={allListings} onDeleteListing={onDeleteListing} dbListings={dbListings} />
       )}
@@ -521,6 +523,102 @@ function CreditsTab() {
               Fechar
             </button>
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CamerasTab() {
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    const { data, error: rpcError } = await supabase.rpc('admin_camera_activity_summary')
+    setLoading(false)
+    if (rpcError) {
+      setError(rpcError.message)
+      return
+    }
+    setError(null)
+    setRows(data || [])
+  }, [])
+
+  useEffect(() => { loadData() }, [loadData])
+
+  const suspiciousCount = rows.filter((r) => r.suspicious).length
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-bone-100 font-display font-bold text-base">
+          {'Cameras \u2014 atividade e uso'}
+        </h3>
+        <button
+          onClick={loadData}
+          className="text-xs text-bone-300/60 hover:text-bone-100 bg-pine-800 border border-pine-700 rounded-lg px-3 py-1.5 transition-colors"
+        >
+          Atualizar
+        </button>
+      </div>
+
+      {suspiciousCount > 0 && (
+        <div className="flex items-start gap-2 text-sm text-blaze-400 bg-blaze-500/10 border border-blaze-500/20 rounded-lg px-4 py-3">
+          <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+          <span>
+            {suspiciousCount}{' camara(s) com sinais de estarem a ser usadas em mais do que uma unidade fisica (v\u00e1rios IPs diferentes em 48h). N\u00e3o \u00e9 prova definitiva \u2014 vale a pena confirmar com o cliente.'}
+          </span>
+        </div>
+      )}
+
+      {error && (
+        <div className="text-sm text-red-400 bg-red-400/10 rounded-lg p-3">{error}</div>
+      )}
+
+      {loading ? (
+        <div className="text-center text-bone-300/40 text-sm py-8">A carregar...</div>
+      ) : rows.length === 0 ? (
+        <div className="text-center text-bone-300/40 text-sm py-8">{'Nenhuma c\u00e2mara ativada ainda.'}</div>
+      ) : (
+        <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
+          <div className="grid grid-cols-[1.3fr_1fr_70px_70px_1fr_90px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
+            <div>{'Cliente / C\u00e2mara'}</div>
+            <div>{'C\u00f3digo'}</div>
+            <div className="text-center">{'Fotos (7d)'}</div>
+            <div className="text-center">{'IPs (7d)'}</div>
+            <div>{'\u00daltimo IP / hora'}</div>
+            <div className="text-center">{'V\u00e1lida at\u00e9'}</div>
+          </div>
+          {rows.map((r) => (
+            <div
+              key={r.device_code}
+              className={`grid grid-cols-[1.3fr_1fr_70px_70px_1fr_90px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0 ${r.suspicious ? 'bg-blaze-500/5' : ''}`}
+            >
+              <div className="min-w-0">
+                <div className="text-bone-100 text-sm font-medium truncate flex items-center gap-1.5">
+                  {r.suspicious && <AlertTriangle size={13} className="text-blaze-400 shrink-0" />}
+                  {r.user_name || '\u2014'}
+                </div>
+                {r.label && <div className="text-bone-300/50 text-xs truncate">{r.label}</div>}
+              </div>
+              <div className="text-bone-300/70 text-xs font-mono truncate">{r.device_code}</div>
+              <div className="text-center text-bone-100 text-sm">{r.photos_7d}</div>
+              <div className={`text-center text-sm font-semibold ${r.suspicious ? 'text-blaze-400' : 'text-bone-100'}`}>
+                {r.distinct_ips_7d}
+              </div>
+              <div className="text-bone-300/50 text-xs truncate">
+                {r.last_ip || '\u2014'}
+                {r.last_seen_at && (
+                  <div className="text-bone-300/30">
+                    {new Date(r.last_seen_at).toLocaleString('pt-PT')}
+                  </div>
+                )}
+              </div>
+              <div className="text-center text-bone-300/60 text-xs">{r.active_until}</div>
+            </div>
+          ))}
         </div>
       )}
     </div>
