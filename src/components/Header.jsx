@@ -82,7 +82,7 @@ export default function Header({
               </button>
               <button
                 onClick={onLogout}
-                className="hidden sm:flex items-center bg-pine-700 hover:bg-pine-600 transition-colors text-bone-300 hover:text-bone-100 p-2 rounded-full"
+                className="flex items-center bg-pine-700 hover:bg-pine-600 transition-colors text-bone-300 hover:text-bone-100 p-2 rounded-full"
                 title="Sair"
               >
                 <LogOut size={16} />
