@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, User, Phone, MapPin, Mail, Save, Star, Ticket, ShieldCheck, Store, AlertCircle, CheckCircle, Trash2, Camera } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient.js';
 import CameraServiceModal from './CameraServiceModal.jsx';
+import CreditHistoryModal from './CreditHistoryModal.jsx';
 export default function UserProfileModal({
   user,
   profile,
@@ -10,6 +11,7 @@ export default function UserProfileModal({
   onSaved
 }) {
   const [cameraServiceOpen, setCameraServiceOpen] = useState(false);
+  const [creditHistoryOpen, setCreditHistoryOpen] = useState(false);
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
   const [location, setLocation] = useState(profile?.location || '');
@@ -170,6 +172,12 @@ export default function UserProfileModal({
             <p className="text-xs text-bone-300/60 leading-relaxed">
               {creditStatus.detail}
             </p>
+            <button
+              onClick={() => setCreditHistoryOpen(true)}
+              className="mt-2 text-xs text-brass-400 hover:text-brass-300 transition-colors underline underline-offset-2"
+            >
+              {'Ver conta corrente'}
+            </button>
           </div>
 
           {/* Servico de camara para Telegram */}
@@ -288,5 +296,6 @@ export default function UserProfileModal({
       </div>
 
       {cameraServiceOpen && <CameraServiceModal profile={profile} onClose={() => setCameraServiceOpen(false)} onCreditsChanged={onSaved} />}
+      {creditHistoryOpen && <CreditHistoryModal user={user} onClose={() => setCreditHistoryOpen(false)} />}
     </div>;
 }
