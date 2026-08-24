@@ -176,84 +176,74 @@ function UsersTab() {
   )
 
   return (
-    <div className="overflow-x-auto -mx-1">
-    <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden min-w-[500px]">
-      <div className="grid grid-cols-[1fr_70px_100px_110px_90px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
-        <span>Utilizador</span>
-        <span className="text-center">Tipo</span>
-        <span className="text-center">Suspender</span>
-        <span className="text-center">Banir</span>
-        <span className="text-center">Eliminar</span>
+    <div>
+      {/* Desktop: tabela */}
+      <div className="hidden sm:block overflow-x-auto -mx-1">
+      <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden min-w-[500px]">
+        <div className="grid grid-cols-[1fr_70px_100px_110px_90px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
+          <span>Utilizador</span><span className="text-center">Tipo</span>
+          <span className="text-center">Suspender</span><span className="text-center">Banir</span>
+          <span className="text-center">Eliminar</span>
+        </div>
+        {users.length === 0 && <div className="px-4 py-8 text-center text-bone-300/40 text-sm">Nenhum utilizador registado.</div>}
+        {users.map((u) => (
+          <div key={u.id} className={`grid grid-cols-[1fr_70px_100px_110px_90px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0 ${u.blocked ? 'opacity-50' : ''}`}>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-bone-100 text-sm font-medium truncate">{u.full_name || '\u2014'}</span>
+                {u.blocked && <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full shrink-0">Banido</span>}
+                {u.suspended && !u.blocked && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded-full shrink-0">Suspenso</span>}
+              </div>
+              <div className="text-bone-300/50 text-xs truncate">{u.email || '\u2014'}</div>
+            </div>
+            <div className="flex justify-center"><span className="text-xs text-bone-300/60 bg-pine-700 px-2 py-0.5 rounded-full">{roleLabel(u.role)}</span></div>
+            <div className="flex justify-center">
+              {u.role !== 'admin' && <button onClick={() => handleAction(u.id, 'suspended', !u.suspended, u.full_name)} disabled={acting === u.id || u.blocked} className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40 ${u.suspended ? 'bg-brass-500/20 text-brass-400' : 'bg-pine-700 text-bone-300 hover:bg-yellow-500/20 hover:text-yellow-400'}`}>{u.suspended ? <ShieldCheck size={13} /> : <ShieldOff size={13} />}{u.suspended ? 'Reativar' : 'Suspender'}</button>}
+            </div>
+            <div className="flex justify-center">
+              {u.role !== 'admin' && <button onClick={() => handleAction(u.id, 'blocked', !u.blocked, u.full_name)} disabled={acting === u.id} className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40 ${u.blocked ? 'bg-pine-700 text-bone-300' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'}`}><Ban size={13} />{u.blocked ? 'Desbanir' : 'Banir'}</button>}
+            </div>
+            <div className="flex justify-center">
+              {u.role !== 'admin' && <button onClick={() => handleDeleteAccount(u)} disabled={acting === u.id} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-red-900/30 text-red-400 hover:bg-red-900/60 transition-colors disabled:opacity-40"><Trash2 size={13} />Eliminar</button>}
+            </div>
+          </div>
+        ))}
+      </div>
       </div>
 
-      {users.length === 0 && (
-        <div className="px-4 py-8 text-center text-bone-300/40 text-sm">Nenhum utilizador registado.</div>
-      )}
-
-      {users.map((u) => (
-        <div key={u.id} className={`grid grid-cols-[1fr_70px_100px_110px_90px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0 ${u.blocked ? 'opacity-50' : ''}`}>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="text-bone-100 text-sm font-medium truncate">{u.full_name || '\u2014'}</span>
-              {u.blocked && <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full shrink-0">Banido</span>}
-              {u.suspended && !u.blocked && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded-full shrink-0">Suspenso</span>}
+      {/* Mobile: cartao por utilizador */}
+      <div className="sm:hidden space-y-2">
+        {users.length === 0 && <div className="text-center text-bone-300/40 text-sm py-8">Nenhum utilizador registado.</div>}
+        {users.map((u) => (
+          <div key={u.id} className={`bg-pine-800 border border-pine-700 rounded-xl px-4 py-3 space-y-2.5 ${u.blocked ? 'opacity-50' : ''}`}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-bone-100 text-sm font-semibold">{u.full_name || '\u2014'}</span>
+                  {u.blocked && <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full">Banido</span>}
+                  {u.suspended && !u.blocked && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded-full">Suspenso</span>}
+                </div>
+                <div className="text-bone-300/50 text-xs break-all">{u.email || '\u2014'}</div>
+              </div>
+              <span className="text-xs text-bone-300/60 bg-pine-700 px-2 py-0.5 rounded-full shrink-0">{roleLabel(u.role)}</span>
             </div>
-            <div className="text-bone-300/50 text-xs truncate">{u.email || '\u2014'}</div>
-          </div>
-
-          <div className="flex justify-center">
-            <span className="text-xs text-bone-300/60 bg-pine-700 px-2 py-0.5 rounded-full">{roleLabel(u.role)}</span>
-          </div>
-
-          <div className="flex justify-center">
             {u.role !== 'admin' && (
-              <button
-                onClick={() => handleAction(u.id, 'suspended', !u.suspended, u.full_name)}
-                disabled={acting === u.id || u.blocked}
-                className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40 ${
-                  u.suspended
-                    ? 'bg-brass-500/20 text-brass-400 hover:bg-brass-500/30'
-                    : 'bg-pine-700 text-bone-300 hover:bg-yellow-500/20 hover:text-yellow-400'
-                }`}
-              >
-                {u.suspended ? <ShieldCheck size={13} /> : <ShieldOff size={13} />}
-                {u.suspended ? 'Reativar' : 'Suspender'}
-              </button>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button onClick={() => handleAction(u.id, 'suspended', !u.suspended, u.full_name)} disabled={acting === u.id || u.blocked} className={`flex items-center justify-center gap-1 text-xs px-2 py-2 rounded-lg transition-colors disabled:opacity-40 ${u.suspended ? 'bg-brass-500/20 text-brass-400' : 'bg-pine-700 text-bone-300'}`}>
+                  {u.suspended ? <ShieldCheck size={13} /> : <ShieldOff size={13} />}
+                  {u.suspended ? 'Reativar' : 'Suspender'}
+                </button>
+                <button onClick={() => handleAction(u.id, 'blocked', !u.blocked, u.full_name)} disabled={acting === u.id} className={`flex items-center justify-center gap-1 text-xs px-2 py-2 rounded-lg transition-colors disabled:opacity-40 ${u.blocked ? 'bg-pine-700 text-bone-300' : 'bg-red-500/10 text-red-400'}`}>
+                  <Ban size={13} />{u.blocked ? 'Desbanir' : 'Banir'}
+                </button>
+                <button onClick={() => handleDeleteAccount(u)} disabled={acting === u.id} className="flex items-center justify-center gap-1 text-xs px-2 py-2 rounded-lg bg-red-900/30 text-red-400 transition-colors disabled:opacity-40">
+                  <Trash2 size={13} />Eliminar
+                </button>
+              </div>
             )}
           </div>
-
-          <div className="flex justify-center">
-            {u.role !== 'admin' && (
-              <button
-                onClick={() => handleAction(u.id, 'blocked', !u.blocked, u.full_name)}
-                disabled={acting === u.id}
-                className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40 ${
-                  u.blocked
-                    ? 'bg-pine-700 text-bone-300 hover:bg-brass-500/20 hover:text-brass-400'
-                    : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
-                }`}
-              >
-                <Ban size={13} />
-                {u.blocked ? 'Desbanir' : 'Banir'}
-              </button>
-            )}
-          </div>
-
-          <div className="flex justify-center">
-            {u.role !== 'admin' && (
-              <button
-                onClick={() => handleDeleteAccount(u)}
-                disabled={acting === u.id}
-                className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-red-900/30 text-red-400 hover:bg-red-900/60 transition-colors disabled:opacity-40"
-              >
-                <Trash2 size={13} />
-                Eliminar
-              </button>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -621,7 +611,9 @@ function CamerasTab() {
       ) : rows.length === 0 ? (
         <div className="text-center text-bone-300/40 text-sm py-8">{'Nenhuma c\u00e2mara ativada ainda.'}</div>
       ) : (
-        <div className="overflow-x-auto -mx-1">
+        <>
+        {/* Desktop: tabela */}
+        <div className="hidden sm:block overflow-x-auto -mx-1">
         <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden min-w-[600px]">
           <div className="grid grid-cols-[1.2fr_1fr_65px_65px_1fr_85px_75px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
             <div>{'Cliente / C\u00e2mara'}</div>
@@ -646,24 +638,14 @@ function CamerasTab() {
               </div>
               <div className="text-bone-300/70 text-xs font-mono truncate">{r.device_code}</div>
               <div className="text-center text-bone-100 text-sm">{r.photos_7d}</div>
-              <div className={`text-center text-sm font-semibold ${r.suspicious ? 'text-blaze-400' : 'text-bone-100'}`}>
-                {r.distinct_ips_7d}
-              </div>
+              <div className={`text-center text-sm font-semibold ${r.suspicious ? 'text-blaze-400' : 'text-bone-100'}`}>{r.distinct_ips_7d}</div>
               <div className="text-bone-300/50 text-xs truncate">
                 {r.last_ip || '\u2014'}
-                {r.last_seen_at && (
-                  <div className="text-bone-300/30">
-                    {new Date(r.last_seen_at).toLocaleString('pt-PT')}
-                  </div>
-                )}
+                {r.last_seen_at && <div className="text-bone-300/30">{new Date(r.last_seen_at).toLocaleString('pt-PT')}</div>}
               </div>
               <div className="text-center text-bone-300/60 text-xs">{r.active_until}</div>
               <div className="text-center">
-                <button
-                  onClick={() => handleClear(r.device_code, r.label || r.user_name)}
-                  disabled={clearing === r.device_code}
-                  className="text-[11px] text-bone-300/50 hover:text-red-400 underline underline-offset-2 disabled:opacity-40"
-                >
+                <button onClick={() => handleClear(r.device_code, r.label || r.user_name)} disabled={clearing === r.device_code} className="text-[11px] text-bone-300/50 hover:text-red-400 underline underline-offset-2 disabled:opacity-40">
                   {clearing === r.device_code ? '...' : 'Limpar'}
                 </button>
               </div>
@@ -671,6 +653,46 @@ function CamerasTab() {
           ))}
         </div>
         </div>
+
+        {/* Mobile: cartao por camara */}
+        <div className="sm:hidden space-y-2">
+          {rows.map((r) => (
+            <div key={r.device_code} className={`bg-pine-800 border rounded-xl px-4 py-3 space-y-2 ${r.suspicious ? 'border-blaze-400/40 bg-blaze-500/5' : 'border-pine-700'}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-bone-100 text-sm font-semibold flex items-center gap-1.5">
+                    {r.suspicious && <AlertTriangle size={13} className="text-blaze-400 shrink-0" />}
+                    {r.user_name || '\u2014'}
+                  </div>
+                  {r.label && <div className="text-bone-300/50 text-xs">{r.label}</div>}
+                  <div className="text-bone-300/40 text-[11px] font-mono mt-0.5">{r.device_code}</div>
+                </div>
+                <div className="text-right shrink-0 text-xs">
+                  <div className="text-bone-300/50">{'V\u00e1lida at\u00e9'}</div>
+                  <div className="text-bone-100">{r.active_until}</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-xs text-center">
+                <div className="bg-pine-900/50 rounded-lg py-1.5">
+                  <div className="text-bone-300/50 text-[10px]">Fotos 7d</div>
+                  <div className="text-bone-100 font-bold">{r.photos_7d}</div>
+                </div>
+                <div className={`rounded-lg py-1.5 ${r.suspicious ? 'bg-blaze-500/10' : 'bg-pine-900/50'}`}>
+                  <div className="text-bone-300/50 text-[10px]">IPs 7d</div>
+                  <div className={`font-bold ${r.suspicious ? 'text-blaze-400' : 'text-bone-100'}`}>{r.distinct_ips_7d}</div>
+                </div>
+                <div className="bg-pine-900/50 rounded-lg py-1.5">
+                  <div className="text-bone-300/50 text-[10px]">{'\u00daltimo IP'}</div>
+                  <div className="text-bone-300/70 text-[10px] truncate px-1">{r.last_ip || '\u2014'}</div>
+                </div>
+              </div>
+              <button onClick={() => handleClear(r.device_code, r.label || r.user_name)} disabled={clearing === r.device_code} className="w-full text-xs text-red-400/60 hover:text-red-400 underline underline-offset-2 disabled:opacity-40 py-0.5">
+                {clearing === r.device_code ? 'A limpar...' : 'Limpar hist\u00f3rico'}
+              </button>
+            </div>
+          ))}
+        </div>
+        </>
       )}
     </div>
   )
