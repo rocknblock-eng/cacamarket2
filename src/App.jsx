@@ -144,7 +144,7 @@ export default function App() {
     const {
       data,
       error
-    } = await supabase.from('listings').select('id, title, category, price, condition, description, image_url, image_urls, seller_id, created_at, expires_at, featured, profiles(id, full_name, role, verified, rating, reviews_count, location, member_since, phone, email)').order('created_at', {
+    } = await supabase.from('listings').select('id, title, category, price, condition, description, image_url, image_urls, seller_id, created_at, expires_at, featured, featured_until, profiles(id, full_name, role, verified, rating, reviews_count, location, member_since, phone, email)').order('created_at', {
       ascending: false
     });
     if (error || !data) return;
@@ -161,6 +161,7 @@ export default function App() {
       image_urls: row.image_urls || null,
       description: row.description,
       featured: row.featured || false,
+      featuredUntil: row.featured_until || null,
       source: 'db'
     }));
     const sellersFromDb = {};
@@ -333,7 +334,10 @@ export default function App() {
     }} sellers={allSellers} user={user} profile={profile} authLoading={authLoading} onEdit={listing => {
       setViewingListing(null);
       setEditingListing(listing);
-    }} onDelete={handleDeleteListing} canDelete={!!viewingListing && viewingListing.source === 'db' && (user?.id === viewingListing.sellerId || profile?.role === 'admin')} onOpenLightbox={(images, index) => setLightbox({
+    }} onDelete={handleDeleteListing} canDelete={!!viewingListing && viewingListing.source === 'db' && (user?.id === viewingListing.sellerId || profile?.role === 'admin')} onFeatured={() => {
+      loadListings();
+      if (user) refreshProfile(user.id);
+    }} onOpenLightbox={(images, index) => setLightbox({
       images,
       index
     })} />
