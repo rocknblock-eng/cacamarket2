@@ -62,7 +62,7 @@ function encodeField(text, length = 64) {
 }
 
 // Gera o ficheiro Parameter.dat personalizado para este dispositivo.
-function buildParameterDat({ smtpServer, smtpPort, deviceCode, recipient }) {
+function buildParameterDat({ smtpServer, smtpPort, deviceCode, recipient, apn, gprsAccount, gprsPassword }) {
   const data = buildTemplate()
   if (data.length !== FILE_LENGTH) {
     throw new Error(
@@ -73,11 +73,14 @@ function buildParameterDat({ smtpServer, smtpPort, deviceCode, recipient }) {
   const blockStart = data.length - 768
 
   const fields = {
-    4: smtpServer,      // SmtpServer
-    5: smtpPort,         // SmtpPort
-    6: deviceCode,        // SendEmail (identificador desta camara)
-    7: 'wildmarket',       // SendEmailPassword (nao validado pelo servidor)
-    8: recipient,           // SmtpEmail1 (nao usado para routing, so preenchimento)
+    1: apn || 'internet',    // GprsAPN
+    2: gprsAccount || '',     // GprsAccount
+    3: gprsPassword || '',     // GprsPassword
+    4: smtpServer,               // SmtpServer
+    5: smtpPort,                  // SmtpPort
+    6: deviceCode,                 // SendEmail (identificador desta camara)
+    7: 'wildmarket',                // SendEmailPassword (nao validado pelo servidor)
+    8: recipient,                     // SmtpEmail1 (nao usado para routing, so preenchimento)
   }
 
   for (const [idx, value] of Object.entries(fields)) {
@@ -88,7 +91,7 @@ function buildParameterDat({ smtpServer, smtpPort, deviceCode, recipient }) {
   return data
 }
 
-function downloadParameterDat(deviceCode) {
+function downloadParameterDat(deviceCode, network) {
   let bytes
   try {
     bytes = buildParameterDat({
@@ -96,6 +99,9 @@ function downloadParameterDat(deviceCode) {
       smtpPort: '25',
       deviceCode,
       recipient: `${deviceCode}@wildmarket.app`,
+      apn: network.apn,
+      gprsAccount: network.account,
+      gprsPassword: network.password,
     })
   } catch (err) {
     alert(err.message)
@@ -114,12 +120,37 @@ function downloadParameterDat(deviceCode) {
 
 const BOT_USERNAME = 'wildmarket_teste_camera_bot'
 
+// Predefinicoes de APN para operadoras portuguesas, tiradas diretamente da
+// base de dados oficial da propria aplicacao da camara (SMTPDB.DB, secao
+// "Portugal"). O cliente pode sempre editar os campos a seguir a escolher.
+const CARRIER_PRESETS = [
+  { id: 'meo', label: 'MEO', apn: 'internet', account: 'tmn', password: 'tmnnet' },
+  { id: 'vodafone', label: 'Vodafone', apn: 'net2.vodafone.pt', account: '', password: '' },
+  { id: 'nos', label: 'NOS', apn: 'internet', account: '', password: '' },
+  { id: 'outro', label: 'Outra / nao sei', apn: '', account: '', password: '' },
+]
+
 export default function CameraServiceModal({ profile, onClose, onCreditsChanged }) {
   const [code, setCode] = useState('')
   const [label, setLabel] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null) // { device_code, active_until }
+
+  const [carrierId, setCarrierId] = useState('meo')
+  const [apn, setApn] = useState(CARRIER_PRESETS[0].apn)
+  const [gprsAccount, setGprsAccount] = useState(CARRIER_PRESETS[0].account)
+  const [gprsPassword, setGprsPassword] = useState(CARRIER_PRESETS[0].password)
+
+  function handleCarrierChange(id) {
+    setCarrierId(id)
+    const preset = CARRIER_PRESETS.find((c) => c.id === id)
+    if (preset) {
+      setApn(preset.apn)
+      setGprsAccount(preset.account)
+      setGprsPassword(preset.password)
+    }
+  }
 
   const credits = profile?.listing_credits ?? 0
 
@@ -190,6 +221,10 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
               </div>
               <div className="flex gap-2">
                 <span className="font-display font-bold text-brass-400">3.</span>
+                <span>{'Escolhe a tua operadora m\u00f3vel (para a c\u00e2mara conseguir ligar-se \u00e0 internet)'}</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-display font-bold text-brass-400">4.</span>
                 <span>{'Descarrega o ficheiro e copia para o cart\u00e3o SD da c\u00e2mara'}</span>
               </div>
             </div>
@@ -216,6 +251,59 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
                   placeholder={'Ex: C\u00e2mara do monte'}
                   className="w-full bg-pine-900 border border-pine-600 rounded-lg px-3 py-2 text-bone-100 text-sm"
                 />
+              </div>
+
+              <div className="border-t border-pine-700 pt-3 mt-1">
+                <label className="text-xs text-bone-300/60 block mb-1">
+                  {'Operadora do cart\u00e3o SIM da c\u00e2mara'}
+                </label>
+                <select
+                  value={carrierId}
+                  onChange={(e) => handleCarrierChange(e.target.value)}
+                  className="w-full bg-pine-900 border border-pine-600 rounded-lg px-3 py-2 text-bone-100 text-sm mb-2"
+                >
+                  {CARRIER_PRESETS.map((c) => (
+                    <option key={c.id} value={c.id}>{c.label}</option>
+                  ))}
+                </select>
+
+                <div className="grid grid-cols-1 gap-2">
+                  <div>
+                    <label className="text-[11px] text-bone-300/50 block mb-1">APN</label>
+                    <input
+                      type="text"
+                      value={apn}
+                      onChange={(e) => setApn(e.target.value)}
+                      placeholder="internet"
+                      className="w-full bg-pine-900 border border-pine-600 rounded-lg px-3 py-2 text-bone-100 text-sm"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[11px] text-bone-300/50 block mb-1">{'Utilizador (se pedir)'}</label>
+                      <input
+                        type="text"
+                        value={gprsAccount}
+                        onChange={(e) => setGprsAccount(e.target.value)}
+                        className="w-full bg-pine-900 border border-pine-600 rounded-lg px-3 py-2 text-bone-100 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-bone-300/50 block mb-1">{'Password (se pedir)'}</label>
+                      <input
+                        type="text"
+                        value={gprsPassword}
+                        onChange={(e) => setGprsPassword(e.target.value)}
+                        className="w-full bg-pine-900 border border-pine-600 rounded-lg px-3 py-2 text-bone-100 text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+                {carrierId === 'outro' && (
+                  <p className="text-[11px] text-bone-300/40 mt-1.5">
+                    {'Consulta o site do teu operador para veres o APN correto, ou pergunta ao suporte.'}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -254,7 +342,7 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
               {' que l\u00e1 est\u00e1).'}
             </p>
             <button
-              onClick={() => downloadParameterDat(result.device_code)}
+              onClick={() => downloadParameterDat(result.device_code, { apn, account: gprsAccount, password: gprsPassword })}
               className="w-full bg-brass-500 hover:bg-brass-400 text-pine-900 font-display font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <Download size={18} />
