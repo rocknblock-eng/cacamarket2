@@ -60,7 +60,7 @@ export default function AdminPanel({
       {tab === 'cameras' && <CamerasTab />}
       {tab === 'featured' && <FeaturedSettingsTab settings={platformSettings} onSaved={onSettingsSaved} />}
       {tab === 'moderation' && (
-        <ModerationTab listings={allListings} onDeleteListing={onDeleteListing} dbListings={dbListings} />
+        <ModerationTab listings={allListings} onDeleteListing={onDeleteListing} dbListings={dbListings} sellers={allSellers} />
       )}
       {tab === 'settings' && (
         <SettingsTab settings={platformSettings} onSaved={onSettingsSaved} />
@@ -812,7 +812,7 @@ function FeaturedSettingsTab({ settings, onSaved }) {
   )
 }
 
-function ModerationTab({ listings, onDeleteListing, dbListings }) {
+function ModerationTab({ listings, onDeleteListing, dbListings, sellers }) {
   const [featuredIds, setFeaturedIds] = useState(
     new Set(dbListings.filter(l => l.featured).map(l => l.id))
   )
@@ -835,7 +835,9 @@ function ModerationTab({ listings, onDeleteListing, dbListings }) {
 
   return (
     <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
-      {listings.map((l) => (
+      {listings.map((l) => {
+        const seller = sellers?.[l.sellerId]
+        return (
         <div key={l.id} className="flex items-center justify-between px-4 py-3 border-b border-pine-700 last:border-0 gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
@@ -846,6 +848,9 @@ function ModerationTab({ listings, onDeleteListing, dbListings }) {
             </div>
             <div className="text-bone-300/60 text-xs">
               {l.price} {'\u20ac'} {l.source === 'demo' && '\u00b7 Artigo de exemplo'}
+            </div>
+            <div className="text-bone-300/40 text-[11px]">
+              {'Vendedor: '}{seller?.name || '\u2014'}
             </div>
           </div>
 
@@ -875,7 +880,8 @@ function ModerationTab({ listings, onDeleteListing, dbListings }) {
             </button>
           </div>
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
