@@ -56,7 +56,7 @@ export default function PayWallModal({
 
         <div className="flex flex-col gap-2 mb-4">
           <PaymentOption icon={<Wallet size={16} />} label="PayPal" enabled={PAYMENT_CONFIG.paypalEnabled} onClick={handlePayPal} loading={status === 'redirecting'} />
-          <PaymentOption icon={<CreditCard size={16} />} label='Cart\u00e3o (Stripe)' enabled={PAYMENT_CONFIG.stripeEnabled} comingSoon />
+          <PaymentOption icon={<CreditCard size={16} />} label={'Cart\u00e3o (Stripe)'} enabled={PAYMENT_CONFIG.stripeEnabled} comingSoon />
           <PaymentOption icon={<Smartphone size={16} />} label="MB Way" enabled={PAYMENT_CONFIG.mbwayEnabled} comingSoon />
         </div>
 

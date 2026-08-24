@@ -139,14 +139,14 @@ export default function EditListingModal({
               <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handlePhotosChange} className="hidden" />
             </label>}
 
-          <input value={title} onChange={e => setTitle(e.target.value)} placeholder='T\u00edtulo do an\u00fancio' className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500" />
+          <input value={title} onChange={e => setTitle(e.target.value)} placeholder={'T\u00edtulo do an\u00fancio'} className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500" />
 
           <select value={category} onChange={e => setCategory(e.target.value)} className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 outline-none focus:border-blaze-500">
             {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>
 
           <div className="flex gap-2">
-            <input value={price} onChange={e => setPrice(e.target.value)} type="number" min="0" step="0.01" placeholder='Pre\u00e7o (\u20ac)' className="flex-1 bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500" />
+            <input value={price} onChange={e => setPrice(e.target.value)} type="number" min="0" step="0.01" placeholder={'Pre\u00e7o (\u20ac)'} className="flex-1 bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500" />
             <select value={condition} onChange={e => setCondition(e.target.value)} className="flex-1 bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 outline-none focus:border-blaze-500">
               <option>Novo</option>
               <option>Usado - Bom estado</option>
@@ -155,7 +155,7 @@ export default function EditListingModal({
             </select>
           </div>
 
-          <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder='Descri\u00e7\u00e3o do artigo' rows={3} className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500 resize-none" />
+          <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder={'Descri\u00e7\u00e3o do artigo'} rows={3} className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500 resize-none" />
 
           {error && <p className="text-xs text-red-400">{error}</p>}
 

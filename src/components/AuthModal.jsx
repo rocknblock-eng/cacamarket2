@@ -106,7 +106,7 @@ export default function AuthModal({
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           {mode === 'register' && <>
               <input value={fullName} onChange={e => setFullName(e.target.value)} required placeholder="Nome completo" className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500" />
-              <input value={phone} onChange={e => setPhone(e.target.value)} placeholder='Telem\u00f3vel (para WhatsApp) \u2014 opcional' className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500" />
+              <input value={phone} onChange={e => setPhone(e.target.value)} placeholder={'Telem\u00f3vel (para WhatsApp) \u2014 opcional'} className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40 outline-none focus:border-blaze-500" />
               <div className="flex gap-2">
                 <button type="button" onClick={() => setRole('particular')} className={`flex-1 text-xs font-medium py-2 rounded-lg transition-colors ${role === 'particular' ? 'bg-brass-400 text-pine-950' : 'bg-pine-700 text-bone-300'}`}>
                   Sou particular

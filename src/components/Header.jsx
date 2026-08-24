@@ -19,7 +19,7 @@ export default function Header({
 
         <div className="flex-1 flex items-center bg-pine-800 border border-pine-600 rounded-full px-3 py-2 gap-2">
           <Search size={16} className="text-bone-300 shrink-0" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder='Procurar equipamento de ca\u00e7a...' className="bg-transparent outline-none text-sm text-bone-100 placeholder:text-bone-300/50 w-full" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={'Procurar equipamento de ca\u00e7a...'} className="bg-transparent outline-none text-sm text-bone-100 placeholder:text-bone-300/50 w-full" />
         </div>
 
         {profile && <button onClick={onOpenSell} className="flex items-center gap-1.5 bg-pine-700 hover:bg-pine-600 transition-colors text-bone-100 font-semibold text-sm px-3 py-2 rounded-full shrink-0">
@@ -34,7 +34,7 @@ export default function Header({
               </span>}
           </button>}
 
-        {profile?.role === 'admin' && <button onClick={onOpenAdmin} className="hidden sm:flex items-center gap-1 text-xs text-bone-300 hover:text-blaze-400 transition-colors px-2" title='Painel de administra\u00e7\u00e3o'>
+        {profile?.role === 'admin' && <button onClick={onOpenAdmin} className="hidden sm:flex items-center gap-1 text-xs text-bone-300 hover:text-blaze-400 transition-colors px-2" title={'Painel de administra\u00e7\u00e3o'}>
             <ShieldCheck size={16} />
           </button>}
 

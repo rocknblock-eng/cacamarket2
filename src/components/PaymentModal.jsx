@@ -56,9 +56,9 @@ export default function PaymentModal({
             <p className="text-bone-300/70 text-sm mb-4 line-clamp-1">{listing.title}</p>
 
             <div className="flex flex-col gap-2 mb-4">
-              <PaymentOption id="stripe" icon={<CreditCard size={16} />} label='Cart\u00e3o (Stripe)' enabled={PAYMENT_CONFIG.stripeEnabled} selected={method === 'stripe'} onSelect={setMethod} />
+              <PaymentOption id="stripe" icon={<CreditCard size={16} />} label={'Cart\u00e3o (Stripe)'} enabled={PAYMENT_CONFIG.stripeEnabled} selected={method === 'stripe'} onSelect={setMethod} />
               <PaymentOption id="paypal" icon={<Wallet size={16} />} label="PayPal" enabled={PAYMENT_CONFIG.paypalEnabled} selected={method === 'paypal'} onSelect={setMethod} />
-              <PaymentOption id="mbway" icon={<Smartphone size={16} />} label='MB Way / Transfer\u00eancia IBAN' enabled={PAYMENT_CONFIG.mbwayEnabled} selected={method === 'mbway'} onSelect={setMethod} />
+              <PaymentOption id="mbway" icon={<Smartphone size={16} />} label={'MB Way / Transfer\u00eancia IBAN'} enabled={PAYMENT_CONFIG.mbwayEnabled} selected={method === 'mbway'} onSelect={setMethod} />
             </div>
 
             <div className="bg-pine-700/50 rounded-lg p-3 text-sm mb-4 space-y-1">

@@ -665,7 +665,7 @@ function ModerationTab({ listings, onDeleteListing, dbListings }) {
             <button
               onClick={() => onDeleteListing(l)}
               className="text-red-400 hover:text-red-300 shrink-0"
-              title="Apagar an\u00fancio"
+              title={'Apagar an\u00fancio'}
             >
               <Trash2 size={18} />
             </button>
