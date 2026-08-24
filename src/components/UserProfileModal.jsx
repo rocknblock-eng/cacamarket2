@@ -3,6 +3,7 @@ import { X, User, Phone, MapPin, Mail, Save, Star, Ticket, ShieldCheck, Store, A
 import { supabase } from '../lib/supabaseClient.js';
 import CameraServiceModal from './CameraServiceModal.jsx';
 import CreditHistoryModal from './CreditHistoryModal.jsx';
+import FeatureListingsModal from './FeatureListingsModal.jsx';
 export default function UserProfileModal({
   user,
   profile,
@@ -12,6 +13,7 @@ export default function UserProfileModal({
 }) {
   const [cameraServiceOpen, setCameraServiceOpen] = useState(false);
   const [creditHistoryOpen, setCreditHistoryOpen] = useState(false);
+  const [featureListingsOpen, setFeatureListingsOpen] = useState(false);
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
   const [location, setLocation] = useState(profile?.location || '');
@@ -178,6 +180,12 @@ export default function UserProfileModal({
             >
               {'Ver conta corrente'}
             </button>
+            <button
+              onClick={() => setFeatureListingsOpen(true)}
+              className="mt-2 ml-3 text-xs text-brass-400 hover:text-brass-300 transition-colors underline underline-offset-2"
+            >
+              {'Destacar um anuncio'}
+            </button>
           </div>
 
           {/* Servico de camara para Telegram */}
@@ -297,5 +305,6 @@ export default function UserProfileModal({
 
       {cameraServiceOpen && <CameraServiceModal profile={profile} onClose={() => setCameraServiceOpen(false)} onCreditsChanged={onSaved} />}
       {creditHistoryOpen && <CreditHistoryModal user={user} onClose={() => setCreditHistoryOpen(false)} />}
+      {featureListingsOpen && <FeatureListingsModal user={user} onClose={() => setFeatureListingsOpen(false)} onFeatured={onSaved} />}
     </div>;
 }
