@@ -200,32 +200,79 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
               {'Tens atualmente '}<strong className="text-bone-100">{credits}</strong>{' cr\u00e9dito(s).'}
             </p>
 
-            <div className="bg-pine-900/50 rounded-xl p-4 space-y-3 text-sm text-bone-300/80">
-              <div className="flex gap-2">
-                <span className="font-display font-bold text-brass-400">1.</span>
-                <span>
-                  {'No Telegram, abre a conversa com '}
-                  <span
-                    onClick={() => window.open(`https://t.me/${BOT_USERNAME}`, '_blank', 'noreferrer')}
-                    className="text-brass-400 underline inline-flex items-center gap-1 cursor-pointer"
-                  >
-                    @{BOT_USERNAME} <Send size={12} />
-                  </span>
-                  {' e envia '}
-                  <code className="bg-pine-700 px-1 rounded">/start</code>
-                </span>
+            <div className="bg-pine-700/30 border border-pine-600/50 rounded-lg px-3 py-2.5 text-xs text-bone-300/70 leading-relaxed">
+              <p className="font-semibold text-bone-200 mb-1">{'C\u00e2maras suportadas'}</p>
+              <p>
+                {'C\u00e2maras '}<strong className="text-bone-100">{'Suntek 2G/4G'}</strong>
+                {' com envio de foto por SMTP \u2014 modelos do tipo '}
+                <strong className="text-bone-100">{'HC900M'}</strong>{', '}
+                <strong className="text-bone-100">{'HC300M'}</strong>
+                {' (o "M" no nome indica que a c\u00e2mara suporta envio por MMS ou SMTP).'}
+                {' '}
+                {'Testado e garantido na '}<strong className="text-bone-100">{'HC900M'}</strong>{'.'}
+                {' '}
+                {'Configuras a c\u00e2mara atrav\u00e9s do programa Windows '}
+                <strong className="text-bone-100">{'"MMSCONFIG"'}</strong>
+                {', o mesmo que j\u00e1 vem com este tipo de c\u00e2mara.'}
+                {' '}
+                {'C\u00e2maras sem a fun\u00e7\u00e3o de envio por email/SMTP (s\u00f3 grava\u00e7\u00e3o no cart\u00e3o SD) n\u00e3o s\u00e3o compat\u00edveis.'}
+              </p>
+            </div>
+
+            <div className="bg-pine-900/50 rounded-xl p-4 space-y-4 text-sm text-bone-300/80">
+              <div>
+                <p className="text-xs font-display font-bold text-brass-400 uppercase tracking-wide mb-2">
+                  {'No Telegram'}
+                </p>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <span className="font-display font-bold text-brass-400 shrink-0">1.</span>
+                    <span>
+                      {'Abre a conversa com '}
+                      <span
+                        onClick={() => window.open(`https://t.me/${BOT_USERNAME}`, '_blank', 'noreferrer')}
+                        className="text-brass-400 underline inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        @{BOT_USERNAME} <Send size={12} />
+                      </span>
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-display font-bold text-brass-400 shrink-0">2.</span>
+                    <span>
+                      {'Envia '}<code className="bg-pine-700 px-1 rounded">/start</code>
+                      {' \u2014 o bot responde com um c\u00f3digo de 6 n\u00fameros'}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-display font-bold text-brass-400 shrink-0">3.</span>
+                    <span>{'Cola esse c\u00f3digo no campo abaixo, aqui no site'}</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <span className="font-display font-bold text-brass-400">2.</span>
-                <span>{'Cola aqui o c\u00f3digo de 6 n\u00fameros que o bot te enviar'}</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-display font-bold text-brass-400">3.</span>
-                <span>{'Escolhe a tua operadora m\u00f3vel (para a c\u00e2mara conseguir ligar-se \u00e0 internet)'}</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-display font-bold text-brass-400">4.</span>
-                <span>{'Descarrega o ficheiro e copia para o cart\u00e3o SD da c\u00e2mara'}</span>
+
+              <div className="border-t border-pine-700 pt-3">
+                <p className="text-xs font-display font-bold text-brass-400 uppercase tracking-wide mb-2">
+                  {'Na c\u00e2mara'}
+                </p>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <span className="font-display font-bold text-brass-400 shrink-0">4.</span>
+                    <span>{'Escolhe a operadora do cart\u00e3o SIM que est\u00e1 na c\u00e2mara (ou introduz o APN \u00e0 m\u00e3o)'}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-display font-bold text-brass-400 shrink-0">5.</span>
+                    <span>{'Depois de ativares, descarrega o ficheiro '}<code className="bg-pine-700 px-1 rounded">Parameter.dat</code></span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-display font-bold text-brass-400 shrink-0">6.</span>
+                    <span>{'Tira o cart\u00e3o SD da c\u00e2mara, liga-o ao computador, e copia o ficheiro para dentro dele (substitui o que l\u00e1 estiver)'}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-display font-bold text-brass-400 shrink-0">7.</span>
+                    <span>{'Volta a colocar o cart\u00e3o na c\u00e2mara e liga-a \u2014 as defini\u00e7\u00f5es ficam aplicadas automaticamente'}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -336,11 +383,7 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
                 {'C\u00e2mara ativada! V\u00e1lida at\u00e9 '}<strong>{result.active_until}</strong>.
               </span>
             </div>
-            <p className="text-bone-300/70 text-sm">
-              {'Descarrega o ficheiro abaixo e copia para o cart\u00e3o SD da tua c\u00e2mara (substitui o ficheiro '}
-              <code className="bg-pine-700 px-1 rounded">Parameter.dat</code>
-              {' que l\u00e1 est\u00e1).'}
-            </p>
+
             <button
               onClick={() => downloadParameterDat(result.device_code, { apn, account: gprsAccount, password: gprsPassword })}
               className="w-full bg-brass-500 hover:bg-brass-400 text-pine-900 font-display font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
@@ -348,6 +391,32 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
               <Download size={18} />
               Descarregar Parameter.dat
             </button>
+
+            <div className="bg-pine-900/50 rounded-xl p-4 space-y-2 text-sm text-bone-300/80">
+              <p className="text-xs font-display font-bold text-brass-400 uppercase tracking-wide mb-1">
+                {'Agora, na c\u00e2mara:'}
+              </p>
+              <div className="flex gap-2">
+                <span className="font-display font-bold text-brass-400 shrink-0">1.</span>
+                <span>{'Tira o cart\u00e3o SD da c\u00e2mara e liga-o ao computador'}</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-display font-bold text-brass-400 shrink-0">2.</span>
+                <span>
+                  {'Copia o ficheiro que descarregaste para dentro do cart\u00e3o, substituindo o ficheiro '}
+                  <code className="bg-pine-700 px-1 rounded">Parameter.dat</code>{' que j\u00e1 l\u00e1 estiver'}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-display font-bold text-brass-400 shrink-0">3.</span>
+                <span>{'Volta a colocar o cart\u00e3o na c\u00e2mara'}</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-display font-bold text-brass-400 shrink-0">4.</span>
+                <span>{'Liga a c\u00e2mara \u2014 as novas defini\u00e7\u00f5es s\u00e3o aplicadas automaticamente, sem mais nada a fazer'}</span>
+              </div>
+            </div>
+
             <button
               onClick={onClose}
               className="w-full text-bone-300/60 hover:text-bone-100 text-sm py-1 transition-colors"
