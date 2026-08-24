@@ -533,6 +533,7 @@ function CamerasTab() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [clearing, setClearing] = useState(null) // codigo da camara a limpar, ou 'ALL'
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -550,18 +551,44 @@ function CamerasTab() {
 
   const suspiciousCount = rows.filter((r) => r.suspicious).length
 
+  async function handleClear(code, label) {
+    const confirmMsg = code
+      ? `Limpar o historico desta camara (${label})? Os registos de IP/fotos sao apagados, mas a camara continua ativa normalmente.`
+      : 'Limpar o historico de TODAS as cameras? Esta acao nao pode ser desfeita.'
+    if (!window.confirm(confirmMsg)) return
+
+    setClearing(code || 'ALL')
+    const { error: rpcError } = await supabase.rpc('admin_clear_camera_activity', { target_code: code || null })
+    setClearing(null)
+
+    if (rpcError) {
+      alert('Erro ao limpar: ' + rpcError.message)
+      return
+    }
+    loadData()
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-bone-100 font-display font-bold text-base">
           {'Cameras \u2014 atividade e uso'}
         </h3>
-        <button
-          onClick={loadData}
-          className="text-xs text-bone-300/60 hover:text-bone-100 bg-pine-800 border border-pine-700 rounded-lg px-3 py-1.5 transition-colors"
-        >
-          Atualizar
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleClear(null, null)}
+            disabled={clearing === 'ALL' || rows.length === 0}
+            className="text-xs text-red-400/80 hover:text-red-400 bg-pine-800 border border-pine-700 rounded-lg px-3 py-1.5 transition-colors disabled:opacity-40"
+          >
+            {clearing === 'ALL' ? 'A limpar...' : 'Limpar tudo'}
+          </button>
+          <button
+            onClick={loadData}
+            className="text-xs text-bone-300/60 hover:text-bone-100 bg-pine-800 border border-pine-700 rounded-lg px-3 py-1.5 transition-colors"
+          >
+            Atualizar
+          </button>
+        </div>
       </div>
 
       {suspiciousCount > 0 && (
@@ -583,18 +610,19 @@ function CamerasTab() {
         <div className="text-center text-bone-300/40 text-sm py-8">{'Nenhuma c\u00e2mara ativada ainda.'}</div>
       ) : (
         <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
-          <div className="grid grid-cols-[1.3fr_1fr_70px_70px_1fr_90px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
+          <div className="grid grid-cols-[1.2fr_1fr_65px_65px_1fr_85px_75px] gap-2 px-4 py-2 border-b border-pine-700 text-xs text-bone-300/50 font-semibold uppercase tracking-wide">
             <div>{'Cliente / C\u00e2mara'}</div>
             <div>{'C\u00f3digo'}</div>
             <div className="text-center">{'Fotos (7d)'}</div>
             <div className="text-center">{'IPs (7d)'}</div>
             <div>{'\u00daltimo IP / hora'}</div>
             <div className="text-center">{'V\u00e1lida at\u00e9'}</div>
+            <div className="text-center">{'A\u00e7\u00f5es'}</div>
           </div>
           {rows.map((r) => (
             <div
               key={r.device_code}
-              className={`grid grid-cols-[1.3fr_1fr_70px_70px_1fr_90px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0 ${r.suspicious ? 'bg-blaze-500/5' : ''}`}
+              className={`grid grid-cols-[1.2fr_1fr_65px_65px_1fr_85px_75px] gap-2 items-center px-4 py-3 border-b border-pine-700/50 last:border-0 ${r.suspicious ? 'bg-blaze-500/5' : ''}`}
             >
               <div className="min-w-0">
                 <div className="text-bone-100 text-sm font-medium truncate flex items-center gap-1.5">
@@ -617,6 +645,15 @@ function CamerasTab() {
                 )}
               </div>
               <div className="text-center text-bone-300/60 text-xs">{r.active_until}</div>
+              <div className="text-center">
+                <button
+                  onClick={() => handleClear(r.device_code, r.label || r.user_name)}
+                  disabled={clearing === r.device_code}
+                  className="text-[11px] text-bone-300/50 hover:text-red-400 underline underline-offset-2 disabled:opacity-40"
+                >
+                  {clearing === r.device_code ? '...' : 'Limpar'}
+                </button>
+              </div>
             </div>
           ))}
         </div>
