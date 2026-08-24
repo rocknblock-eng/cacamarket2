@@ -37,12 +37,12 @@ export default function AdminPanel({
 
       <h1 className="font-display font-bold text-2xl text-bone-100 mb-5">Painel de Administracao</h1>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex overflow-x-auto gap-2 mb-6 pb-1 -mx-4 px-4 scrollbar-hide">
         {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full border transition-colors ${
+            className={`flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full border transition-colors shrink-0 ${
               tab === t.id
                 ? 'bg-blaze-500 border-blaze-500 text-pine-950'
                 : 'border-pine-600 text-bone-200'
