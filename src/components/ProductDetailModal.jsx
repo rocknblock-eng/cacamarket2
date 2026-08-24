@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { X, MapPin, ShieldCheck, Trash2, Pencil, MessageCircle, Mail, Phone, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, MapPin, ShieldCheck, Trash2, Pencil, MessageCircle, Mail, Phone, ChevronLeft, ChevronRight, ZoomIn, Star, AlertCircle } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient.js';
 function whatsappLink(phone, listingTitle) {
   const digits = phone.replace(/[^\d]/g, '');
   const message = encodeURIComponent(`Ol\u00e1! Tenho interesse no an\u00fancio "${listingTitle}" no WildMarket.`);
@@ -147,12 +148,22 @@ export default function ProductDetailModal({
   onDelete,
   canDelete,
   onEdit,
+  onFeatured,
   user,
   profile,
   onOpenLightbox,
   authLoading
 }) {
   const [showContact, setShowContact] = useState(false);
+  const [featuredSettings, setFeaturedSettings] = useState(null);
+  const [featuring, setFeaturing] = useState(false);
+  const [featureError, setFeatureError] = useState(null);
+
+  useEffect(() => {
+    supabase.from('platform_settings').select('featured_price_credits, featured_duration_days').eq('id', 1).single()
+      .then(({ data }) => { if (data) setFeaturedSettings(data); });
+  }, []);
+
   if (!listing) return null;
   const seller = sellers[listing.sellerId];
   if (!seller) return null;
@@ -161,6 +172,23 @@ export default function ProductDetailModal({
   const isSeller = user?.id === listing.sellerId;
   const isAdmin = profile?.role === 'admin';
   const canEdit = isSeller && listing.source === 'db';
+  const isCurrentlyFeatured = listing.featured === true &&
+    (!listing.featuredUntil || new Date(listing.featuredUntil) > new Date());
+
+  async function handleFeature() {
+    if (!featuredSettings) return;
+    const confirmMsg = `Destacar este anuncio por ${featuredSettings.featured_duration_days} dias, por ${featuredSettings.featured_price_credits} creditos?`;
+    if (!window.confirm(confirmMsg)) return;
+    setFeaturing(true);
+    setFeatureError(null);
+    const { error } = await supabase.rpc('purchase_featured_listing', { target_listing_id: listing.id });
+    setFeaturing(false);
+    if (error) {
+      setFeatureError(error.message);
+      return;
+    }
+    onFeatured?.();
+  }
   return <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="bg-pine-800 border border-pine-600 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto relative">
         <button onClick={onClose} className="absolute top-4 right-4 text-bone-300 hover:text-blaze-400 z-10">
@@ -230,6 +258,31 @@ export default function ProductDetailModal({
                     </a>}
                 </div>}
             </>}
+
+          {canEdit && !isCurrentlyFeatured && featuredSettings && (
+            <button
+              onClick={handleFeature}
+              disabled={featuring}
+              className="w-full flex items-center justify-center gap-2 bg-brass-500 hover:bg-brass-400 disabled:opacity-60 text-pine-950 text-sm font-semibold py-2.5 rounded-lg transition-colors"
+            >
+              <Star size={15} className="fill-pine-950" />
+              {featuring
+                ? 'A destacar...'
+                : `Destacar anuncio (${featuredSettings.featured_price_credits} creditos, ${featuredSettings.featured_duration_days} dias)`}
+            </button>
+          )}
+          {isCurrentlyFeatured && (
+            <div className="flex items-center gap-2 text-xs text-brass-400 bg-brass-400/10 rounded-lg px-3 py-2">
+              <Star size={13} className="fill-brass-400 shrink-0" />
+              {'Em destaque ate '}{new Date(listing.featuredUntil).toLocaleDateString('pt-PT')}
+            </div>
+          )}
+          {featureError && (
+            <div className="flex items-start gap-2 text-xs text-red-400 bg-red-400/10 rounded-lg px-3 py-2">
+              <AlertCircle size={13} className="shrink-0 mt-0.5" />
+              {featureError}
+            </div>
+          )}
 
           {canEdit && <button onClick={() => onEdit(listing)} className="w-full flex items-center justify-center gap-2 bg-pine-700 hover:bg-pine-600 text-bone-100 text-sm font-semibold py-2.5 rounded-lg transition-colors">
               <Pencil size={15} />{'Editar an\u00fancio'}</button>}

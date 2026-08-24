@@ -8,7 +8,7 @@ export default function ProductCard({
   const seller = sellers[listing.sellerId];
   if (!seller) return null;
   const isDemo = listing.source === 'demo';
-  const isFeatured = listing.featured === true;
+  const isFeatured = listing.featured === true && (!listing.featuredUntil || new Date(listing.featuredUntil) > new Date());
   return <div className={`bg-pine-800 rounded-xl overflow-hidden flex flex-col transition-colors ${isFeatured ? 'border-2 border-brass-400 shadow-[0_0_12px_rgba(180,140,60,0.3)] hover:border-brass-300' : 'border border-pine-700 hover:border-blaze-500/60'}`}>
       <button onClick={() => onView(listing)} className="aspect-[4/3] bg-pine-700 flex items-center justify-center text-bone-300/40 text-xs w-full overflow-hidden relative">
         {listing.image ? <img src={listing.image} alt={listing.title} className="w-full h-full object-cover" /> : 'Sem imagem'}

@@ -9,8 +9,13 @@ export default function ProductGrid({ listings, onOpenSeller, onView, sellers })
     )
   }
 
-  const featured = listings.filter(l => l.featured === true && l.source !== 'demo')
-  const rest = listings.filter(l => !(l.featured === true && l.source !== 'demo'))
+  function isActiveFeatured(l) {
+    return l.featured === true && l.source !== 'demo' &&
+      (!l.featuredUntil || new Date(l.featuredUntil) > new Date())
+  }
+
+  const featured = listings.filter(isActiveFeatured)
+  const rest = listings.filter(l => !isActiveFeatured(l))
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">

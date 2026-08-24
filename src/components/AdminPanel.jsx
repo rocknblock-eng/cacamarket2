@@ -664,6 +664,8 @@ function CamerasTab() {
 
 function SettingsTab({ settings, onSaved }) {
   const [launchDate, setLaunchDate] = useState(settings?.launch_date ?? '')
+  const [featuredPrice, setFeaturedPrice] = useState(settings?.featured_price_credits ?? 2)
+  const [featuredDays, setFeaturedDays] = useState(settings?.featured_duration_days ?? 30)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
@@ -672,7 +674,11 @@ function SettingsTab({ settings, onSaved }) {
     setSaved(false)
     const { error } = await supabase
       .from('platform_settings')
-      .update({ launch_date: launchDate || null })
+      .update({
+        launch_date: launchDate || null,
+        featured_price_credits: Number(featuredPrice) || 0,
+        featured_duration_days: Number(featuredDays) || 1,
+      })
       .eq('id', 1)
     setSaving(false)
     if (!error) {
@@ -729,6 +735,36 @@ function SettingsTab({ settings, onSaved }) {
       {freeUntilText && (
         <p className="text-xs text-brass-400">{'Data definida \u2014 sera gratis para todos ate '}<strong>{freeUntilText}</strong>.</p>
       )}
+
+      <div className="border-t border-pine-700 pt-4">
+        <h3 className="text-bone-100 font-semibold text-sm mb-2">{'Destaque de anuncios'}</h3>
+        <p className="text-bone-300/70 text-xs mb-3">
+          {'Preco e duracao de quando um cliente compra destaque para o proprio anuncio. Independente da validade do anuncio (90 dias).'}
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-bone-300/70 block mb-1">{'Custo (creditos)'}</label>
+            <input
+              type="number"
+              min="0"
+              value={featuredPrice}
+              onChange={(e) => setFeaturedPrice(e.target.value)}
+              className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 outline-none focus:border-blaze-500 w-full"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-bone-300/70 block mb-1">{'Duracao (dias)'}</label>
+            <input
+              type="number"
+              min="1"
+              value={featuredDays}
+              onChange={(e) => setFeaturedDays(e.target.value)}
+              className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 outline-none focus:border-blaze-500 w-full"
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-center gap-3">
         <button
           onClick={handleSave}
