@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings, Coins, Plus, Minus, Ban, ShieldOff, ShieldCheck, Star, Camera, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings, Coins, Plus, Minus, Ban, ShieldOff, ShieldCheck, Star, Camera, AlertTriangle, DatabaseBackup, ChevronDown, ChevronUp } from 'lucide-react'
 import { LISTINGS, SELLERS } from '../data/listings.js'
 import { supabase } from '../lib/supabaseClient.js'
 
@@ -8,6 +8,7 @@ const TABS = [
   { id: 'users', label: 'Utilizadores', icon: Users },
   { id: 'credits', label: 'Creditos', icon: Coins },
   { id: 'cameras', label: 'Cameras', icon: Camera },
+  { id: 'backups', label: 'Backups', icon: DatabaseBackup },
   { id: 'featured', label: 'Destaques', icon: Star },
   { id: 'moderation', label: 'Moderacao', icon: ListChecks },
   { id: 'settings', label: 'Definicoes', icon: Settings }
@@ -58,6 +59,7 @@ export default function AdminPanel({
       {tab === 'users' && <UsersTab sellers={allSellers} />}
       {tab === 'credits' && <CreditsTab />}
       {tab === 'cameras' && <CamerasTab />}
+      {tab === 'backups' && <BackupsTab />}
       {tab === 'featured' && <FeaturedSettingsTab settings={platformSettings} onSaved={onSettingsSaved} />}
       {tab === 'moderation' && (
         <ModerationTab listings={allListings} onDeleteListing={onDeleteListing} dbListings={dbListings} sellers={allSellers} />
@@ -527,6 +529,218 @@ function CreditsTab() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+const BACKUP_ALERT_DAYS = 14
+
+const BACKUP_KIND_LABELS = {
+  database: 'Base de dados (Supabase)',
+  vps: 'Servidor de cameras (VPS)',
+  outro: 'Outro'
+}
+
+function BackupsTab() {
+  const [logs, setLogs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [kind, setKind] = useState('database')
+  const [note, setNote] = useState('')
+  const [showInstructions, setShowInstructions] = useState(false)
+
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    const { data, error: qError } = await supabase
+      .from('admin_backup_log')
+      .select('*')
+      .order('performed_at', { ascending: false })
+      .limit(20)
+    setLoading(false)
+    if (qError) {
+      setError(qError.message)
+      return
+    }
+    setError(null)
+    setLogs(data || [])
+  }, [])
+
+  useEffect(() => { loadData() }, [loadData])
+
+  async function handleLogBackup() {
+    setSaving(true)
+    const { data: userData } = await supabase.auth.getUser()
+    const { error: insError } = await supabase.from('admin_backup_log').insert({
+      kind,
+      note: note.trim() || null,
+      created_by: userData?.user?.id || null
+    })
+    setSaving(false)
+    if (insError) {
+      alert('Erro ao registar: ' + insError.message)
+      return
+    }
+    setNote('')
+    loadData()
+  }
+
+  const lastDbBackup = logs.find((l) => l.kind === 'database')
+  const daysSinceLastDb = lastDbBackup
+    ? Math.floor((Date.now() - new Date(lastDbBackup.performed_at).getTime()) / (1000 * 60 * 60 * 24))
+    : null
+  const isOverdue = daysSinceLastDb === null || daysSinceLastDb >= BACKUP_ALERT_DAYS
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-bone-100 font-display font-bold text-base">
+        {'Backups \u2014 base de dados e servidor'}
+      </h3>
+
+      {isOverdue ? (
+        <div className="flex items-start gap-2 text-sm text-blaze-400 bg-blaze-500/10 border border-blaze-500/20 rounded-lg px-4 py-3">
+          <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+          <span>
+            {daysSinceLastDb === null
+              ? 'Ainda nao ha nenhum backup da base de dados registado. '
+              : `Ja passaram ${daysSinceLastDb} dias desde o ultimo backup registado da base de dados. `}
+            {'Convem fazer um backup em breve (ver instrucoes abaixo).'}
+          </span>
+        </div>
+      ) : (
+        <div className="flex items-start gap-2 text-sm text-pine-300 bg-pine-700/30 border border-pine-600/40 rounded-lg px-4 py-3">
+          <ShieldCheck size={16} className="shrink-0 mt-0.5 text-brass-400" />
+          <span>
+            {`Ultimo backup da base de dados ha ${daysSinceLastDb} dia(s). Dentro do prazo normal (alerta a partir de ${BACKUP_ALERT_DAYS} dias).`}
+          </span>
+        </div>
+      )}
+
+      <div className="bg-pine-800 border border-pine-700 rounded-xl p-4 space-y-3">
+        <p className="text-bone-100 font-semibold text-sm">{'Registar um backup feito agora'}</p>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <select
+            value={kind}
+            onChange={(e) => setKind(e.target.value)}
+            className="bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100"
+          >
+            <option value="database">{'Base de dados (Supabase)'}</option>
+            <option value="vps">{'Servidor de cameras (VPS)'}</option>
+            <option value="outro">{'Outro'}</option>
+          </select>
+          <input
+            type="text"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Nota opcional (ex: exportacao manual, ficheiro guardado no Drive)"
+            className="flex-1 bg-pine-700 border border-pine-600 rounded-lg px-3 py-2 text-sm text-bone-100 placeholder:text-bone-300/40"
+          />
+          <button
+            onClick={handleLogBackup}
+            disabled={saving}
+            className="bg-blaze-500 hover:bg-blaze-400 text-pine-950 text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50 shrink-0"
+          >
+            {saving ? 'A guardar...' : 'Marcar feito agora'}
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-pine-800 border border-pine-700 rounded-xl overflow-hidden">
+        <button
+          onClick={() => setShowInstructions((v) => !v)}
+          className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-bone-100"
+        >
+          {'Como fazer um backup'}
+          {showInstructions ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+        {showInstructions && (
+          <div className="px-4 pb-4 space-y-3 text-xs text-bone-300/80 leading-relaxed border-t border-pine-700 pt-3">
+            <div>
+              <p className="font-semibold text-bone-100 mb-1">{'Base de dados (Supabase, plano Free)'}</p>
+              <p>
+                {'Abre o painel de backups do Supabase diretamente: '}
+                <a
+                  href="https://supabase.com/dashboard/project/igyfrnfwomwblwywvnbq/database/backups"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-brass-400 underline"
+                >
+                  {'supabase.com \u2192 Database \u2192 Backups'}
+                </a>
+                {'. Ai usa '}<strong className="text-bone-100">{'Download'}</strong>
+                {' (ou o '}
+                <a
+                  href="https://supabase.com/dashboard/project/igyfrnfwomwblwywvnbq/sql/new"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-brass-400 underline"
+                >
+                  {'SQL Editor'}
+                </a>
+                {' com um pg_dump). Guardar o ficheiro .sql num local seguro (Google Drive, disco externo). Recomendado pelo menos a cada 14 dias.'}
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-bone-100 mb-1">{'Servidor de cameras (VPS Hostinger)'}</p>
+              <p>
+                {'Acede ao terminal do VPS atraves do '}
+                <a
+                  href="https://hpanel.hostinger.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-brass-400 underline"
+                >
+                  {'painel Hostinger (hPanel)'}
+                </a>
+                {', e guarda periodicamente uma copia comprimida (.zip) da pasta /opt/wildcam/ e das configuracoes relevantes (Nginx, systemd), transferida para fora do proprio servidor.'}
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-bone-100 mb-1">{'Codigo do site'}</p>
+              <p>
+                {'Ja fica salvaguardado automaticamente no '}
+                <a
+                  href="https://github.com/rocknblock-eng/cacamarket2"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-brass-400 underline"
+                >
+                  {'reposit\u00f3rio GitHub'}
+                </a>
+                {', com historico completo. Nao precisa de backup manual.'}
+              </p>
+            </div>
+            <p className="text-bone-300/50">
+              {'Depois de fazer o backup, volta aqui e usa o botao "Marcar feito agora" para registar a data.'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-bone-100 font-semibold text-sm">{'Historico'}</p>
+        {loading ? (
+          <p className="text-bone-300/50 text-sm">{'A carregar...'}</p>
+        ) : error ? (
+          <p className="text-red-400 text-sm">{error}</p>
+        ) : logs.length === 0 ? (
+          <p className="text-bone-300/50 text-sm">{'Ainda sem registos.'}</p>
+        ) : (
+          <div className="space-y-1.5">
+            {logs.map((l) => (
+              <div key={l.id} className="flex items-center justify-between bg-pine-800/60 border border-pine-700 rounded-lg px-3 py-2 text-xs">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-bone-100 font-medium shrink-0">
+                    {new Date(l.performed_at).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  <span className="text-bone-300/50 shrink-0">{BACKUP_KIND_LABELS[l.kind] || l.kind}</span>
+                  {l.note && <span className="text-bone-300/60 truncate">{l.note}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
