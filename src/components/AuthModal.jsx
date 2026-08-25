@@ -4,9 +4,10 @@ import { supabase } from '../lib/supabaseClient.js';
 export default function AuthModal({
   onClose,
   onAuthenticated,
-  onOpenLegal
+  onOpenLegal,
+  initialMode
 }) {
-  const [mode, setMode] = useState('login');
+  const [mode, setMode] = useState(initialMode || 'login');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
