@@ -87,7 +87,7 @@ export default function SellModal({
       description,
       image_url: image_urls[0] || null,
       image_urls: image_urls.length > 0 ? image_urls : null,
-      expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+      expires_at: new Date(Date.now() + (isFreePeriod ? 90 : 60) * 24 * 60 * 60 * 1000).toISOString()
     });
     setLoading(false);
     if (insertError) {

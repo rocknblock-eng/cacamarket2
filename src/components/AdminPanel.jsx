@@ -807,7 +807,7 @@ function FeaturedSettingsTab({ settings, onSaved }) {
       <div>
         <h3 className="text-bone-100 font-display font-bold text-base mb-2">{'Destaque de anuncios'}</h3>
         <p className="text-bone-300/70 text-xs mb-3">
-          {'Preco e duracao de quando um cliente compra destaque para o proprio anuncio. Independente da validade do anuncio (90 dias).'}
+          {'Preco e duracao de quando um cliente compra destaque para o proprio anuncio. Independente da validade do anuncio (60 dias, ou 90 dias durante o periodo gratuito de lancamento).'}
         </p>
       </div>
       <div className="grid grid-cols-2 gap-3">
