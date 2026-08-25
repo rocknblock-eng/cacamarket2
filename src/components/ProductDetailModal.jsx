@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, MapPin, ShieldCheck, Trash2, Pencil, MessageCircle, Mail, Phone, ChevronLeft, ChevronRight, ZoomIn, Star, AlertCircle } from 'lucide-react';
+import { X, MapPin, ShieldCheck, Trash2, Pencil, MessageCircle, Mail, Phone, ChevronLeft, ChevronRight, ZoomIn, Star, AlertCircle, Package } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient.js';
 function whatsappLink(phone, listingTitle) {
   const digits = phone.replace(/[^\d]/g, '');
@@ -211,8 +211,8 @@ export default function ProductDetailModal({
 
           {authLoading ? <div className="bg-pine-700/30 rounded-lg p-4 text-center">
               <p className="text-bone-300/40 text-sm">A carregar...</p>
-            </div> : isLoggedIn ? <button onClick={() => onOpenSeller(seller)} className="flex items-center justify-between gap-2 bg-pine-700/50 hover:bg-pine-700 rounded-lg p-3 transition-colors text-left">
-              <div className="flex items-center gap-2 min-w-0">
+            </div> : isLoggedIn ? <div className="space-y-2">
+              <div className="flex items-center gap-2 bg-pine-700/50 rounded-lg p-3">
                 <div className="w-9 h-9 rounded-full bg-pine-700 flex items-center justify-center font-display font-bold text-bone-100 shrink-0">
                   {seller.name.charAt(0)}
                 </div>
@@ -229,7 +229,11 @@ export default function ProductDetailModal({
                   </div>
                 </div>
               </div>
-            </button> : <div className="bg-pine-700/30 rounded-lg p-4 text-center">
+              <button onClick={() => onOpenSeller(seller)} className="w-full flex items-center justify-center gap-2 bg-brass-400/10 hover:bg-brass-400/20 border border-brass-400/40 text-brass-400 text-sm font-semibold py-2.5 rounded-lg transition-colors">
+                <Package size={16} />
+                {'Ver todos os an\u00fancios deste vendedor'}
+              </button>
+            </div> : <div className="bg-pine-700/30 rounded-lg p-4 text-center">
               <p className="text-bone-300/70 text-sm">
                 <span className="font-semibold text-blaze-400">Regista-te</span> para ver o vendedor e entrar em contacto.
               </p>
