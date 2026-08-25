@@ -313,7 +313,10 @@ export default function App() {
           <ProductGrid listings={filtered} onOpenSeller={setSelectedSeller} onView={setViewingListing} sellers={allSellers} />
         </> : <AdminPanel onBack={() => setView('market')} dbListings={dbListings} dbSellers={dbSellers} onDeleteListing={handleDeleteListing} platformSettings={platformSettings} onSettingsSaved={loadSettings} />}
 
-      <SellerProfileModal seller={selectedSeller} onClose={() => setSelectedSeller(null)} listings={allListings} sellers={allSellers} onView={setViewingListing} />
+      <SellerProfileModal seller={selectedSeller} onClose={() => setSelectedSeller(null)} listings={allListings} sellers={allSellers} onView={listing => {
+      setSelectedSeller(null);
+      setViewingListing(listing);
+    }} />
       {profileOpen && user && profile && <UserProfileModal user={user} profile={profile} isFreePeriod={isFreePeriod} onClose={() => setProfileOpen(false)} onSaved={() => refreshProfile(user.id)} />}
       {authOpen && <AuthModal initialMode={authInitialMode} onClose={() => setAuthOpen(false)} onAuthenticated={u => {
       setUser(u);
@@ -342,7 +345,10 @@ export default function App() {
       loadListings();
       refreshProfile(user.id);
     }} />}
-      <ProductDetailModal key={viewingListing?.id || 'none'} listing={viewingListing} onClose={() => setViewingListing(null)} onOpenSeller={setSelectedSeller} onOpenChat={(listing, seller) => {
+      <ProductDetailModal key={viewingListing?.id || 'none'} listing={viewingListing} onClose={() => setViewingListing(null)} onOpenSeller={seller => {
+      setViewingListing(null);
+      setSelectedSeller(seller);
+    }} onOpenChat={(listing, seller) => {
       setViewingListing(null);
       setActiveChat({
         listing,
