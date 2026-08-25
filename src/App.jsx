@@ -15,6 +15,7 @@ import InboxModal from './components/InboxModal.jsx';
 import LegalModal from './components/LegalModal.jsx';
 import EditListingModal from './components/EditListingModal.jsx';
 import ResetPassword from './components/ResetPassword.jsx';
+import WelcomeModal, { WELCOME_MODAL_STORAGE_KEY } from './components/WelcomeModal.jsx';
 import { LISTINGS, SELLERS } from './data/listings.js';
 import { supabase } from './lib/supabaseClient.js';
 function roleToType(role) {
@@ -32,6 +33,14 @@ export default function App() {
   const [search, setSearch] = useState('');
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [authInitialMode, setAuthInitialMode] = useState('login');
+  const [welcomeOpen, setWelcomeOpen] = useState(() => {
+    try {
+      return localStorage.getItem(WELCOME_MODAL_STORAGE_KEY) !== '1';
+    } catch (err) {
+      return true;
+    }
+  });
   const [sellOpen, setSellOpen] = useState(false);
   const [payWallOpen, setPayWallOpen] = useState(false);
   const [paypalStatus, setPaypalStatus] = useState(null);
@@ -294,7 +303,10 @@ export default function App() {
     });
   }, [allListings, category, search]);
   return <div className="min-h-screen bg-pine-900">
-      <Header onOpenAuth={() => setAuthOpen(true)} onOpenAdmin={() => setView('admin')} onOpenSell={handleOpenSell} onOpenProfile={() => setProfileOpen(true)} onOpenInbox={() => setInboxOpen(true)} search={search} setSearch={setSearch} profile={profile} onLogout={handleLogout} unreadCount={unreadCount} />
+      <Header onOpenAuth={() => {
+      setAuthInitialMode('login');
+      setAuthOpen(true);
+    }} onOpenAdmin={() => setView('admin')} onOpenSell={handleOpenSell} onOpenProfile={() => setProfileOpen(true)} onOpenInbox={() => setInboxOpen(true)} search={search} setSearch={setSearch} profile={profile} onLogout={handleLogout} unreadCount={unreadCount} />
 
       {view === 'admin' && profile?.role !== 'admin' ? <div className="max-w-6xl mx-auto px-4 py-16 text-center text-bone-300/60">{'N\u00e3o tens permiss\u00e3o para aceder ao painel de administra\u00e7\u00e3o.'}</div> : view === 'market' ? <>
           <CategoryNav active={category} setActive={setCategory} />
@@ -303,10 +315,15 @@ export default function App() {
 
       <SellerProfileModal seller={selectedSeller} onClose={() => setSelectedSeller(null)} />
       {profileOpen && user && profile && <UserProfileModal user={user} profile={profile} isFreePeriod={isFreePeriod} onClose={() => setProfileOpen(false)} onSaved={() => refreshProfile(user.id)} />}
-      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} onAuthenticated={u => {
+      {authOpen && <AuthModal initialMode={authInitialMode} onClose={() => setAuthOpen(false)} onAuthenticated={u => {
       setUser(u);
       refreshProfile(u.id);
     }} onOpenLegal={tab => setLegalOpen(tab)} />}
+      {welcomeOpen && <WelcomeModal onClose={() => setWelcomeOpen(false)} onRegister={() => {
+      setWelcomeOpen(false);
+      setAuthInitialMode('register');
+      setAuthOpen(true);
+    }} />}
       {paypalStatus === 'confirming' && <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
           <div className="bg-pine-800 border border-pine-600 rounded-xl px-6 py-4 text-bone-100 text-sm">
             A confirmar o teu pagamento com o PayPal...
