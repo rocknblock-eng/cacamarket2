@@ -219,7 +219,9 @@ export default function ProductDetailModal({
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="text-bone-100 text-sm font-medium truncate">{seller.name}</span>
-                    {seller.verified && <ShieldCheck size={13} className="text-brass-400 shrink-0" />}
+                    {seller.verified && <span className="shrink-0 bg-brass-400/20 rounded-full p-0.5 flex items-center justify-center" title="Vendedor verificado">
+                      <ShieldCheck size={16} className="text-brass-400" />
+                    </span>}
                   </div>
                   <div className="flex items-center gap-1 text-[11px] text-bone-300/60">
                     <MapPin size={11} />

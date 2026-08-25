@@ -24,7 +24,9 @@ export default function SellerProfileModal({
           <div>
             <div className="flex items-center gap-1.5">
               <h2 className="font-display font-bold text-bone-100 text-lg">{seller.name}</h2>
-              {seller.verified && <ShieldCheck size={16} className="text-brass-400" />}
+              {seller.verified && <span className="shrink-0 bg-brass-400/20 rounded-full p-0.5 flex items-center justify-center" title="Vendedor verificado">
+                <ShieldCheck size={18} className="text-brass-400" />
+              </span>}
             </div>
             <span className="text-xs text-bone-300/70">{seller.type}</span>
           </div>
