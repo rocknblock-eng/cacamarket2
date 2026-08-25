@@ -201,6 +201,16 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
               {'Tens atualmente '}<strong className="text-bone-100">{credits}</strong>{' cr\u00e9dito(s).'}
             </p>
 
+            <div className="bg-blaze-500/10 border border-blaze-500/40 rounded-lg px-3 py-2.5 flex gap-2 items-start">
+              <AlertCircle size={16} className="text-blaze-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-bone-100 leading-relaxed">
+                <strong>{'Cada configura\u00e7\u00e3o serve apenas para uma unidade f\u00edsica de c\u00e2mara.'}</strong>
+                {' Comportamentos suspeitos (ex: mesma configura\u00e7\u00e3o usada em v\u00e1rias c\u00e2maras) est\u00e3o sujeitos a '}
+                <strong>{'suspens\u00e3o'}</strong>
+                {' do servi\u00e7o.'}
+              </p>
+            </div>
+
             <div className="bg-pine-700/30 border border-pine-600/50 rounded-lg px-3 py-2.5 text-xs text-bone-300/70 leading-relaxed">
               <p className="font-semibold text-bone-200 mb-1">{'C\u00e2maras suportadas'}</p>
               <p>
