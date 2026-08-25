@@ -119,6 +119,7 @@ function downloadParameterDat(deviceCode, network) {
 }
 
 const BOT_USERNAME = 'wildmarket_teste_camera_bot'
+const BOT_DISPLAY_NAME = 'wildmarket.app Camera'
 
 // Predefinicoes de APN para operadoras portuguesas, tiradas diretamente da
 // base de dados oficial da propria aplicacao da camara (SMTPDB.DB, secao
@@ -228,12 +229,12 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
                   <div className="flex gap-2">
                     <span className="font-display font-bold text-brass-400 shrink-0">1.</span>
                     <span>
-                      {'Abre a conversa com '}
+                      {'Abre a conversa com o bot '}
                       <span
                         onClick={() => window.open(`https://t.me/${BOT_USERNAME}`, '_blank', 'noreferrer')}
                         className="text-brass-400 underline inline-flex items-center gap-1 cursor-pointer"
                       >
-                        @{BOT_USERNAME} <Send size={12} />
+                        {BOT_DISPLAY_NAME} <Send size={12} />
                       </span>
                     </span>
                   </div>
