@@ -206,8 +206,8 @@ export default function CameraServiceModal({ profile, onClose, onCreditsChanged 
               <p className="text-xs text-bone-100 leading-relaxed">
                 <strong>{'Cada configura\u00e7\u00e3o serve apenas para uma unidade f\u00edsica de c\u00e2mara.'}</strong>
                 {' Comportamentos suspeitos (ex: mesma configura\u00e7\u00e3o usada em v\u00e1rias c\u00e2maras) est\u00e3o sujeitos a '}
-                <strong>{'suspens\u00e3o'}</strong>
-                {' do servi\u00e7o.'}
+                <strong>{'suspens\u00e3o do servi\u00e7o, sem aviso pr\u00e9vio'}</strong>
+                {'.'}
               </p>
             </div>
 
