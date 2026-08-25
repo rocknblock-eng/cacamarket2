@@ -37,7 +37,7 @@ export default function WelcomeModal({ onClose, onRegister }) {
             {': um espa\u00e7o de confian\u00e7a entre pessoas que partilham a mesma paix\u00e3o.'}
           </p>
           <p>
-            {'Por quest\u00f5es legais, n\u00e3o vendemos armas de fogo nem muni\u00e7\u00f5es \u2014 o nosso foco \u00e9 tudo o resto que faz a diferen\u00e7a numa sa\u00edda de campo ou numa sess\u00e3o de tiro.'}
+            {'Por quest\u00f5es legais, n\u00e3o aceitamos an\u00fancios que promovam o com\u00e9rcio de armas e muni\u00e7\u00f5es \u2014 o nosso foco \u00e9 tudo o resto que faz a diferen\u00e7a numa sa\u00edda de campo ou numa sess\u00e3o de tiro.'}
           </p>
 
           <div className="bg-blaze-500/10 border border-blaze-500/30 rounded-xl px-4 py-3 flex gap-3 items-start">
