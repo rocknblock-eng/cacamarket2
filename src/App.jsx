@@ -313,7 +313,7 @@ export default function App() {
           <ProductGrid listings={filtered} onOpenSeller={setSelectedSeller} onView={setViewingListing} sellers={allSellers} />
         </> : <AdminPanel onBack={() => setView('market')} dbListings={dbListings} dbSellers={dbSellers} onDeleteListing={handleDeleteListing} platformSettings={platformSettings} onSettingsSaved={loadSettings} />}
 
-      <SellerProfileModal seller={selectedSeller} onClose={() => setSelectedSeller(null)} />
+      <SellerProfileModal seller={selectedSeller} onClose={() => setSelectedSeller(null)} listings={allListings} sellers={allSellers} onView={setViewingListing} />
       {profileOpen && user && profile && <UserProfileModal user={user} profile={profile} isFreePeriod={isFreePeriod} onClose={() => setProfileOpen(false)} onSaved={() => refreshProfile(user.id)} />}
       {authOpen && <AuthModal initialMode={authInitialMode} onClose={() => setAuthOpen(false)} onAuthenticated={u => {
       setUser(u);
