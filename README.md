@@ -1,176 +1,148 @@
-# CaçaMarket — projeto de código
+# WildMarket
 
-Este é o código real do CaçaMarket, como projeto React, pronto para:
-1. Correr no teu computador para continuares a desenvolver;
-2. Publicar num site em hospedagem partilhada normal (site web);
-3. Ser embrulhado numa app Android através do Android Studio.
+Mercado online portugues de equipamento de caca e tiro desportivo.
+Site: wildmarket.app
 
-Sem armas, munições ou acessórios de arma — conforme decidido, para evitar
-questões regulatórias com a Lei n.º 5/2006 (armas e munições).
-
----
-
-## 1. Preparar o computador (só uma vez)
-
-Precisas de ter o **Node.js** instalado (já o tens, disseste que já o usaste).
-Confirma no terminal:
-
-```
-node -v
-npm -v
-```
-
-Se aparecer um número de versão em cada comando, está tudo pronto.
+Sem armas de fogo nem municoes - o WildMarket nao aceita anuncios que
+promovam o comercio de armas e municoes, conforme a Lei n.o 5/2006
+(armas e municoes) e legislacao subsequente.
 
 ---
 
-## 2. Correr o projeto localmente (para veres e continuares a trabalhar)
+## Stack tecnico
 
-Dentro da pasta do projeto:
-
-```
-npm install
-npm run dev
-```
-
-Isto abre o site em `http://localhost:5173`. Qualquer alteração que faças
-aos ficheiros aparece logo ali, sem teres de reiniciar nada.
-
----
-
-## 3. Publicar como site (hospedagem partilhada)
-
-Quando estiveres satisfeito com o resultado:
-
-```
-npm run build
-```
-
-Isto cria uma pasta `dist/` com o site já "compilado" — só ficheiros HTML,
-CSS e JavaScript simples, que **qualquer hospedagem partilhada aceita**
-(a maioria dos serviços portugueses de hosting funciona assim: fazes upload
-por FTP ou pelo painel de ficheiros, tipo cPanel).
-
-Passos práticos:
-1. Corre `npm run build`
-2. Abre a pasta `dist/`
-3. Envia **o conteúdo** dessa pasta (não a pasta em si) para a pasta
-   `public_html` (ou equivalente) da tua hospedagem, por FTP ou pelo
-   gestor de ficheiros do painel de controlo
-4. Acede ao teu domínio — o site está no ar
-
-Alternativa mais simples, sem FTP: serviços como **Vercel** ou **Netlify**
-publicam isto gratuitamente e de forma automática (arrastas a pasta `dist/`
-para o site deles, ou ligas a uma conta GitHub), se preferires não mexer
-em FTP.
-
----
-
-## 4. Embrulhar como app Android (Android Studio)
-
-Isto usa o **Capacitor**, que pega no mesmo site e transforma-o numa app
-instalável no telemóvel, mantendo o mesmo código.
-
-Passos (correr no terminal, dentro da pasta do projeto):
-
-```
-npm install @capacitor/core @capacitor/cli @capacitor/android
-npm run build
-npx cap add android
-npm run cap:sync
-npm run cap:open
-```
-
-O último comando abre o **Android Studio** automaticamente, já com o
-projeto Android configurado. A partir daí, dentro do Android Studio,
-usa o botão "Run" para testar num emulador ou telemóvel ligado por USB,
-ou "Build > Generate Signed Bundle/APK" quando quiseres gerar o ficheiro
-final para instalar ou publicar na Play Store.
-
-Sempre que alterares o código React, repete só:
-```
-npm run build
-npm run cap:sync
-```
-e volta a correr no Android Studio.
-
----
-
-## 5. Tabela de Preços
-
-A aplicação está **atualmente em modo grátis** — ninguém paga nada.
-Quando o admin definir uma data de lançamento no painel de "Definições",
-os preços passam a ser:
-
-| Tipo de Conta | Regra |
+| Camada | Tecnologia |
 |---|---|
-| **Particular** | 1º anúncio grátis, depois 1€ cada |
-| **Loja** | 5 primeiros anúncios grátis, depois 5€ por pacote de 5 |
-| **Admin** | Sempre grátis |
+| Frontend | React + Vite |
+| Alojamento do site | Cloudflare Pages |
+| Base de dados, autenticacao, storage | Supabase |
+| Logica de servidor (pagamentos, moderacao) | Supabase Edge Functions |
+| Servico de cameras (relay + bot Telegram) | Python, VPS dedicado (fora deste repositorio) |
+| Pagamentos | PayPal (Sandbox - ainda nao passou a Live) |
+| App Android (futuro) | Capacitor, ainda nao lancada |
 
 ---
 
-## 6. Próximo passo: backend de pagamentos
+## Funcionalidades atuais
 
-O ficheiro `src/components/PaymentModal.jsx` já tem a estrutura visual dos
-3 métodos de pagamento (Stripe, PayPal, MB Way/IBAN) e um objeto
-`PAYMENT_CONFIG` no topo para ligares/desligares cada um. Mas os pagamentos
-são só **simulados** por agora — para serem reais, precisam de um servidor
-(backend) com os endpoints:
+### Anuncios
+- Publicacao de anuncios com multiplas fotos (lightbox)
+- Validade de 60 dias (90 dias durante o periodo de lancamento gratuito)
+- Edicao e eliminacao pelo proprio vendedor
+- Destaque de anuncios (pago em creditos, configuravel no admin)
+- Perfil publico do vendedor, com grelha de todos os seus anuncios ativos
 
-- `/api/create-payment-intent` (Stripe)
-- `/api/paypal/create-order`
-- `/api/paypal/capture-order`
+### Contas e autenticacao
+- Registo/login via Supabase Auth
+- Modal de boas-vindas na primeira visita, com apresentacao da plataforma
+- Perfis de Particular e Loja, com regras de precos diferentes
+- Contacto com vendedor via WhatsApp, telefone, email, ou chat interno
 
-Este projeto atual é só o **frontend** (o que se vê). O backend é a peça
-que falta a seguir, e pode correr, por exemplo, num serviço como o Render,
-Railway, ou num servidor próprio — dependendo de onde a hospedagem
-partilhada permitir correr código Node.js (nem todas permitem; a maioria
-das hospedagens partilhadas serve só ficheiros estáticos como este).
+### Creditos e pagamentos
+- Sistema de creditos para publicar anuncios e comprar destaque
+- Particular: 1o anuncio gratis, depois 1 euro cada
+- Loja: 5 primeiros anuncios gratis, depois 1 euro cada
+- Pagamento via PayPal (Edge Functions `paypal-create-order` /
+  `paypal-capture-order`)
+- Historico de creditos consultavel pelo utilizador
+
+### Periodo de lancamento gratuito
+- Data configuravel no Admin -> Definicoes (`launch_date`)
+- Enquanto ativo, tudo e gratuito e os anuncios ficam validos por 90 dias
+- Findo o periodo, aplicam-se os precos normais e a validade passa a 60 dias
+
+### Camaras de fototrapagem (Suntek) para Telegram
+- Servico pago em creditos (10 creditos / 90 dias) que envia as fotos da
+  camara diretamente para o Telegram do utilizador
+- Fluxo de ligacao: utilizador fala com o bot do Telegram, recebe um
+  codigo de 6 digitos, cola-o no site
+- Geracao do ficheiro de configuracao da camara (`Parameter.dat`) feita
+  no proprio browser, sem passar pelo servidor
+- Aviso visivel no site: cada configuracao serve uma unica camara fisica;
+  uso indevido (mesma configuracao em varias camaras) pode levar a
+  suspensao do servico sem aviso previo
+- O relay que recebe o email da camara e reencaminha para o Telegram
+  corre num servico Python dedicado, fora deste repositorio
+
+### Painel de administracao
+Separadores: Estatisticas, Utilizadores, Moderacao, Definicoes, Creditos,
+Camaras.
+- Estatisticas gerais da plataforma
+- Gestao de utilizadores (suspensao/banimento)
+- Moderacao de anuncios
+- Definicoes: periodo de lancamento, precos de destaque
+- Gestao de creditos
+- Camaras: atividade por dispositivo, deteccao de possivel abuso
+  (multiplas camaras a usar o mesmo IP de origem)
 
 ---
 
 ## Estrutura do projeto
 
 ```
-cacamarket/
-├── index.html
-├── src/
-│   ├── App.jsx              → junta tudo, controla período de graça
-│   ├── main.jsx              → arranque da aplicação
-│   ├── index.css             → estilos globais
-│   ├── data/listings.js      → categorias, anúncios e vendedores (exemplo)
-│   ├── lib/
-│   │   └── supabaseClient.js → cliente Supabase
-│   └── components/
-│       ├── Header.jsx
-│       ├── CategoryNav.jsx
-│       ├── ProductCard.jsx
-│       ├── ProductGrid.jsx
-│       ├── ProductDetailModal.jsx
-│       ├── SellerProfileModal.jsx
-│       ├── AuthModal.jsx
-│       ├── PaymentModal.jsx     → interface de pagamentos (métodos configuráveis)
-│       ├── PayWallModal.jsx     → modal de cobrança (aparece quando período de graça termina)
-│       ├── SellModal.jsx        → criar novo anúncio
-│       └── AdminPanel.jsx       → painel admin com definições e moderação
-├── supabase/
-│   ├── schema.sql                      → tabelas base (profiles, auth)
-│   ├── listings_and_storage.sql        → tabela de anúncios + storage de fotos
-│   ├── listing_pricing.sql             → regras de créditos e preços
-│   ├── launch_free_period.sql          → ativar período de graça
-│   ├── close_test_mode.sql             → fechar período de teste
-│   └── functions/
-│       ├── paypal-create-order/index.ts
-│       └── paypal-capture-order/index.ts
-├── capacitor.config.json     → configuração da app Android
-├── vite.config.js            → build config
-├── tailwind.config.js        → estilos Tailwind
-└── package.json
+src/
+  App.jsx                    -> raiz da aplicacao, estado global, roteamento de modais
+  main.jsx                   -> arranque
+  index.css                  -> estilos globais (Tailwind)
+  data/listings.js           -> categorias e dados de exemplo
+  lib/supabaseClient.js      -> cliente Supabase
+  components/
+    Header.jsx
+    CategoryNav.jsx
+    ProductCard.jsx / ProductGrid.jsx
+    ProductDetailModal.jsx      -> detalhe de anuncio
+    SellModal.jsx                -> criar anuncio
+    EditListingModal.jsx         -> editar anuncio
+    FeatureListingsModal.jsx     -> comprar destaque
+    SellerProfileModal.jsx       -> perfil publico do vendedor + os seus anuncios
+    AuthModal.jsx                -> login / registo
+    WelcomeModal.jsx              -> modal de boas-vindas na 1a visita
+    UserProfileModal.jsx          -> perfil do proprio utilizador
+    CameraServiceModal.jsx        -> ativacao do servico de camaras
+    CreditHistoryModal.jsx        -> historico de creditos
+    ChatModal.jsx / InboxModal.jsx -> mensagens entre utilizadores
+    PaymentModal.jsx / PayWallModal.jsx
+    LegalModal.jsx                -> termos e condicoes
+    ResetPassword.jsx
+    AdminPanel.jsx                 -> painel de administracao
+
+supabase/
+  schema.sql                       -> tabelas base
+  listings_and_storage.sql         -> anuncios + storage de fotos
+  listing_pricing.sql / pricing_update.sql
+  listing_expiry.sql               -> regras de validade
+  launch_free_period.sql / close_test_mode.sql / fix_free_period.sql
+  chat.sql                         -> mensagens
+  contact_info.sql
+  delete_permissions.sql
+  fix_blocked_users.sql / fix_chat_admin.sql
+  functions/
+    paypal-create-order/index.ts
+    paypal-capture-order/index.ts
+    delete-expired-listings/index.ts   -> limpeza automatica de anuncios expirados
 ```
 
-**Dados:**
-- `listings.js` contém dados de exemplo e categorias
-- Dados reais vêm da Supabase (BD na nuvem)
-- Fotos guardadas no Supabase Storage
-- Durante período de graça, tudo é grátis
+---
+
+## Tabela de precos
+
+| Tipo de conta | Regra |
+|---|---|
+| Particular | 1o anuncio gratis, depois 1 euro cada |
+| Loja | 5 primeiros anuncios gratis, depois 1 euro cada |
+| Admin | Sempre gratis |
+| Camara para Telegram | 10 creditos / 90 dias |
+
+Durante o periodo de lancamento (data definida no Admin -> Definicoes),
+tudo e gratuito e a validade dos anuncios sobe para 90 dias.
+
+---
+
+## Notas de manutencao
+
+- Todos os ficheiros de codigo sao escritos em ASCII puro (caracteres
+  acentuados como sequencias `\uXXXX`), verificado automaticamente no
+  prebuild pelo `check-ascii.cjs`. Isto evita corrupcao de acentos ao
+  editar pelo editor web do GitHub.
+- O trabalho de codigo e feito quase exclusivamente pelo editor web do
+  GitHub e pelo terminal do painel Hostinger - sem IDE local.
