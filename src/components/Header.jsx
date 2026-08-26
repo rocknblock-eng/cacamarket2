@@ -42,10 +42,10 @@ export default function Header({
             {profile && (
               <button
                 onClick={onOpenInbox}
-                className="relative flex items-center bg-pine-700 hover:bg-pine-600 transition-colors text-bone-300 hover:text-bone-100 p-2 sm:p-3 rounded-full"
+                className="relative flex items-center bg-pine-700 hover:bg-pine-600 transition-colors text-bone-300 hover:text-bone-100 px-3 py-2 rounded-full"
                 title="Mensagens"
               >
-                <MessageCircle className="w-[18px] h-[18px] sm:w-6 sm:h-6" />
+                <MessageCircle size={18} />
                 {unreadCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-blaze-500 text-pine-950 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {unreadCount > 9 ? '9+' : unreadCount}
@@ -76,10 +76,10 @@ export default function Header({
                 </button>
                 <button
                   onClick={onLogout}
-                  className="flex items-center bg-pine-700 hover:bg-pine-600 transition-colors text-bone-300 hover:text-bone-100 p-2 sm:p-2.5 rounded-full"
+                  className="flex items-center bg-pine-700 hover:bg-pine-600 transition-colors text-bone-300 hover:text-bone-100 px-3 py-2 rounded-full"
                   title="Sair"
                 >
-                  <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <LogOut size={16} />
                 </button>
               </div>
             ) : (
