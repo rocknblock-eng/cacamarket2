@@ -98,15 +98,6 @@ export const LISTINGS = [{
   image: null,
   description: 'Podenco Portugu\u00eas de porte m\u00e9dio, com treino espec\u00edfico para ca\u00e7a ao coelho. Vacinas em dia e microchip. Bom temperamento, habituado a conv\u00edvio com outros c\u00e3es.'
 }, {
-  id: 'l5',
-  title: 'Chamariz eletr\u00f3nico multi-esp\u00e9cie, 200 sons',
-  category: 'chamarizes',
-  price: 145,
-  sellerId: 's2',
-  condition: 'Novo',
-  image: null,
-  description: 'Chamariz eletr\u00f3nico com biblioteca de mais de 200 sons de v\u00e1rias esp\u00e9cies. Comando remoto com alcance at\u00e9 150m, coluna resistente \u00e0 \u00e1gua. Bateria recarreg\u00e1vel inclu\u00edda.'
-}, {
   id: 'l6',
   title: 'Faca de ca\u00e7a artesanal, l\u00e2mina 12cm, cabo em nogueira',
   category: 'facas',
