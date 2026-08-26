@@ -20,13 +20,13 @@ export default function Header({
 
           {/* Logo -- maior em mobile e desktop */}
           <div className="shrink-0">
-            <img src="/logo.svg" alt="WildMarket" className="h-14 sm:h-20 w-auto" />
+            <img src="/logo.svg" alt="WildMarket" className="h-11 sm:h-20 w-auto" />
           </div>
 
           <div className="flex-1" />
 
           {/* Botoes de acao -- so icones em mobile */}
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1 shrink-0 overflow-x-auto max-w-full">
 
             {profile && (
               <button
@@ -42,7 +42,7 @@ export default function Header({
             {profile && (
               <button
                 onClick={onOpenInbox}
-                className="relative flex items-center bg-pine-700 hover:bg-pine-600 transition-colors text-bone-300 hover:text-bone-100 px-3 py-2 rounded-full"
+                className="relative flex items-center bg-pine-700 hover:bg-pine-600 transition-colors text-bone-300 hover:text-bone-100 px-2.5 sm:px-4 py-1.5 rounded-full"
                 title="Mensagens"
               >
                 <MessageCircle size={18} />
@@ -76,7 +76,7 @@ export default function Header({
                 </button>
                 <button
                   onClick={onLogout}
-                  className="flex items-center bg-pine-700 hover:bg-pine-600 transition-colors text-bone-300 hover:text-bone-100 px-3 py-2 rounded-full"
+                  className="flex items-center bg-pine-700 hover:bg-pine-600 transition-colors text-bone-300 hover:text-bone-100 px-2.5 sm:px-4 py-1.5 rounded-full"
                   title="Sair"
                 >
                   <LogOut size={16} />
