@@ -233,6 +233,7 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get('token');
     const paypalFlag = params.get('paypal');
+    const paypalPurpose = params.get('purpose') === 'credits' ? 'credits' : 'listing';
     if (paypalFlag === 'cancel') {
       window.history.replaceState({}, '', window.location.pathname);
       return;
@@ -253,8 +254,12 @@ export default function App() {
           return;
         }
         await refreshProfile(user.id);
-        setPaypalStatus('success');
-        setSellOpen(true);
+        if (paypalPurpose === 'credits') {
+          setPaypalStatus('creditsSuccess');
+        } else {
+          setPaypalStatus('success');
+          setSellOpen(true);
+        }
       });
     }
   }, [user, refreshProfile]);
@@ -335,6 +340,14 @@ export default function App() {
       {paypalStatus === 'error' && <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
           <div className="bg-pine-800 border border-pine-600 rounded-xl px-6 py-5 text-center max-w-xs">
             <p className="text-bone-100 text-sm mb-3">{'N\u00e3o foi poss\u00edvel confirmar o pagamento. Se o dinheiro foi debitado, contacta-nos.'}</p>
+            <button onClick={() => setPaypalStatus(null)} className="text-blaze-400 text-sm font-semibold">
+              Fechar
+            </button>
+          </div>
+        </div>}
+      {paypalStatus === 'creditsSuccess' && <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+          <div className="bg-pine-800 border border-pine-600 rounded-xl px-6 py-5 text-center max-w-xs">
+            <p className="text-bone-100 text-sm mb-3">{'Pagamento confirmado! Os teus cr\u00e9ditos j\u00e1 est\u00e3o dispon\u00edveis na tua conta.'}</p>
             <button onClick={() => setPaypalStatus(null)} className="text-blaze-400 text-sm font-semibold">
               Fechar
             </button>
