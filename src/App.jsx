@@ -171,6 +171,7 @@ export default function App() {
       description: row.description,
       featured: row.featured || false,
       featuredUntil: row.featured_until || null,
+      createdAt: row.created_at,
       source: 'db'
     }));
     const sellersFromDb = {};
