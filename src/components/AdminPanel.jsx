@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings, Coins, Plus, Minus, Ban, ShieldOff, ShieldCheck, Star, Camera, AlertTriangle, DatabaseBackup, ChevronDown, ChevronUp } from 'lucide-react'
+import { ArrowLeft, Users, ListChecks, BarChart3, Trash2, Settings, Coins, Plus, Minus, Ban, ShieldOff, ShieldCheck, Star, Camera, AlertTriangle, DatabaseBackup, ChevronDown, ChevronUp, CalendarClock } from 'lucide-react'
 import { LISTINGS, SELLERS } from '../data/listings.js'
 import { supabase } from '../lib/supabaseClient.js'
 
@@ -1065,6 +1065,33 @@ function ModerationTab({ listings, onDeleteListing, dbListings, sellers }) {
     new Set(dbListings.filter(l => l.featured).map(l => l.id))
   )
   const [toggling, setToggling] = useState(null)
+  const [expiryDrafts, setExpiryDrafts] = useState({})
+  const [expiryOverrides, setExpiryOverrides] = useState({})
+  const [savingExpiry, setSavingExpiry] = useState(null)
+
+  function toDateInputValue(isoString) {
+    if (!isoString) return ''
+    return new Date(isoString).toISOString().slice(0, 10)
+  }
+
+  async function handleSaveExpiry(listing) {
+    const draft = expiryDrafts[listing.id]
+    if (!draft) return
+    setSavingExpiry(listing.id)
+    // Guarda ao fim do dia escolhido (23:59:59 local), para o anuncio
+    // ficar visivel durante todo esse dia.
+    const newExpiresAt = new Date(`${draft}T23:59:59`).toISOString()
+    const { error } = await supabase
+      .from('listings')
+      .update({ expires_at: newExpiresAt })
+      .eq('id', listing.id)
+    if (!error) {
+      setExpiryOverrides(prev => ({ ...prev, [listing.id]: newExpiresAt }))
+    } else {
+      alert('N\u00e3o foi poss\u00edvel atualizar a data de expira\u00e7\u00e3o. Tenta novamente.')
+    }
+    setSavingExpiry(null)
+  }
 
   async function toggleFeatured(listing) {
     const isFeatured = featuredIds.has(listing.id)
@@ -1103,6 +1130,24 @@ function ModerationTab({ listings, onDeleteListing, dbListings, sellers }) {
             <div className="text-bone-300/40 text-[11px]">
               {'Publicado: '}{l.createdAt ? new Date(l.createdAt).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '\u2014'}
             </div>
+            {l.source !== 'demo' && (
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <CalendarClock size={13} className="text-bone-300/40 shrink-0" />
+                <input
+                  type="date"
+                  value={expiryDrafts[l.id] ?? toDateInputValue(expiryOverrides[l.id] ?? l.expiresAt)}
+                  onChange={(e) => setExpiryDrafts(prev => ({ ...prev, [l.id]: e.target.value }))}
+                  className="bg-pine-700 border border-pine-600 rounded-lg px-2 py-1 text-[11px] text-bone-100"
+                />
+                <button
+                  onClick={() => handleSaveExpiry(l)}
+                  disabled={savingExpiry === l.id || !expiryDrafts[l.id]}
+                  className="text-[11px] px-2 py-1 rounded-lg bg-brass-400/20 text-brass-400 hover:bg-brass-400/30 transition-colors disabled:opacity-30"
+                >
+                  {savingExpiry === l.id ? '...' : 'Guardar'}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
