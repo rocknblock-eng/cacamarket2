@@ -172,6 +172,7 @@ export default function App() {
       featured: row.featured || false,
       featuredUntil: row.featured_until || null,
       createdAt: row.created_at,
+      expiresAt: row.expires_at,
       source: 'db'
     }));
     const sellersFromDb = {};
