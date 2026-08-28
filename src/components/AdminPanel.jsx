@@ -1100,6 +1100,9 @@ function ModerationTab({ listings, onDeleteListing, dbListings, sellers }) {
             <div className="text-bone-300/40 text-[11px]">
               {'Vendedor: '}{seller?.name || '\u2014'}
             </div>
+            <div className="text-bone-300/40 text-[11px]">
+              {'Publicado: '}{l.createdAt ? new Date(l.createdAt).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '\u2014'}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
